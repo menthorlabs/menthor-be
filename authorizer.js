@@ -33,7 +33,7 @@ module.exports.handler = async (event) => {
     const jwt = sessionId || Authorization.split(" ")[1];
     if (jwt === "MENTHOR-DEV" && process.env.NODE_ENV === "development") {
       return {
-        principalId: "MENTHOR-DEV",
+        principalId: "beb6c8dd-fd94-11ed-95f4-ce3d95a8e965",
         policyDocument: {
           Version: "2012-10-17",
           Statement: [

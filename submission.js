@@ -6,7 +6,7 @@ const SubmissionCreateRequiredParams = {
   SubmissionType: "Missing SubmissionType",
   SubmissionStatus: "Missing SubmissionStatus",
   LessonUrl: "Missing LessonUrl",
-  User_Id: "Missing User_Id",
+  Lesson_Id: "Missing Lesson_Id",
 };
 
 const SubmissionType = new Set(["Image", "Content"]);
@@ -49,6 +49,7 @@ const connectionResolver = async () => {
 
 // Get all submissions on Mysql DB on table submissions paginated
 module.exports.getAll = async (event) => {
+  const userEmail = event.requestContext.authorizer.principalId;
   let { page = 1, size = 10 } = event.queryStringParameters || {
     page: 1,
     size: 10,
@@ -64,8 +65,8 @@ module.exports.getAll = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.execute(
-      "SELECT * FROM Submission LIMIT ?, ?",
-      [(page - 1) * size, parseInt(size)]
+      "SELECT * FROM Submission WHERE User_Id = ? LIMIT ?, ?",
+      [userEmail, (page - 1) * size, parseInt(size)]
     );
     return {
       statusCode: 200,
@@ -82,6 +83,7 @@ module.exports.getAll = async (event) => {
 
 // Get submission by id on Mysql DB on table submissions
 module.exports.get = async (event) => {
+  const userEmail = event.requestContext.authorizer.principalId;
   const { id } = event.pathParameters || null;
   if (!id) {
     return {
@@ -95,8 +97,8 @@ module.exports.get = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.execute(
-      "SELECT * FROM Submission WHERE id = ?",
-      [id]
+      "SELECT * FROM Submission WHERE Id = ? AND User_Id = ?",
+      [id, userEmail]
     );
     return {
       statusCode: 200,
@@ -113,9 +115,9 @@ module.exports.get = async (event) => {
 
 // Create submission on Mysql DB on table submissions
 module.exports.create = async (event) => {
-  const { Content, SubmissionType, SubmissionStatus, LessonUrl, User_Id } =
+  const userEmail = event.requestContext.authorizer.principalId;
+  const { Content, SubmissionType, SubmissionStatus, LessonUrl, Lesson_Id } =
     JSON.parse(event.body) || null;
-
   const missingParam = Object.keys(SubmissionCreateRequiredParams).find(
     (param) => !eval(param)
   );
@@ -148,8 +150,15 @@ module.exports.create = async (event) => {
   // Use the connection
   try {
     connection.execute(
-      "INSERT INTO Submission (Id, Content, SubmissionType, SubmissionStatus, LessonUrl, User_Id) VALUES (UUID(), ?, ?, ?, ?, ?)",
-      [Content, SubmissionType, SubmissionStatus, LessonUrl, User_Id]
+      "INSERT INTO Submission (Id, Content, SubmissionType, SubmissionStatus, LessonUrl, User_Id, Lesson_Id) VALUES (UUID(), ?, ?, ?, ?, ?, ?)",
+      [
+        Content,
+        SubmissionType,
+        SubmissionStatus,
+        LessonUrl,
+        userEmail,
+        Lesson_Id,
+      ]
     );
     return {
       statusCode: 200,
@@ -166,6 +175,7 @@ module.exports.create = async (event) => {
 
 // Patch submission on Mysql DB on table submissions
 module.exports.patch = async (event) => {
+  const userEmail = event.requestContext.authorizer.principalId;
   const { id } = event.pathParameters || null;
   if (!id) {
     return {
@@ -196,8 +206,8 @@ module.exports.patch = async (event) => {
 
     console.log("fieldsToUpdate", fieldsToUpdate);
 
-    const updateQuery = `UPDATE Submission SET ? WHERE Id = ?`;
-    const updateParams = [fieldsToUpdate, id];
+    const updateQuery = `UPDATE Submission SET ? WHERE Id = ? AND User_Id = ?`;
+    const updateParams = [fieldsToUpdate, id, userEmail];
 
     connection.execute(updateQuery, updateParams);
 

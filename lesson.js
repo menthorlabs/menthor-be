@@ -20,6 +20,7 @@ const connectionResolver = async () => {
 
 // Get all lessons on Mysql DB on table lessons paginated
 module.exports.getAll = async (event) => {
+  const userEmail = event.requestContext.authorizer.principalId;
   let { page = 1, size = 10 } = event.queryStringParameters || {
     page: 1,
     size: 10,
@@ -34,10 +35,10 @@ module.exports.getAll = async (event) => {
 
   // Use the connection
   try {
-    const [rows] = await connection.query("SELECT * FROM Lesson LIMIT ?, ?", [
-      (page - 1) * size,
-      parseInt(size),
-    ]);
+    const [rows] = await connection.query(
+      "SELECT * FROM Lesson WHERE User_Id = ? LIMIT ?, ?",
+      [userEmail, (page - 1) * size, parseInt(size)]
+    );
     return {
       statusCode: 200,
       body: JSON.stringify(rows),
@@ -53,6 +54,7 @@ module.exports.getAll = async (event) => {
 
 // Get lesson by id on Mysql DB on table lessons
 module.exports.get = async (event) => {
+  const userEmail = event.requestContext.authorizer.principalId;
   const { id } = event.pathParameters || null;
   if (!id) {
     return {
@@ -65,9 +67,10 @@ module.exports.get = async (event) => {
 
   // Use the connection
   try {
-    const [rows] = await connection.query("SELECT * FROM Lesson WHERE id = ?", [
-      id,
-    ]);
+    const [rows] = await connection.query(
+      "SELECT * FROM Lesson WHERE Id = ? AND User_Id = ?",
+      [id, userEmail]
+    );
     return {
       statusCode: 200,
       body: JSON.stringify(rows),
