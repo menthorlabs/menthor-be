@@ -1,6 +1,12 @@
 const mysql = require("mysql2/promise");
 const CONNECTION = mysql.createConnection(process.env.DATABASE_URL);
 
+const CourseCreateRequiredParams = {
+  Progress: "Missing Progress",
+  CurrentLessonUrl: "Missing ContentUrl",
+  Done: "Missing Done",
+};
+
 const fetchSettings = {
   headers: {
     Authorization: `token ${process.env.GITHUB_TOKEN}`,
@@ -176,6 +182,89 @@ module.exports.content = async (event) => {
     return {
       statusCode: 500,
       body: JSON.stringify(err),
+    };
+  }
+};
+
+// Create a new course on Mysql DB on table courses
+module.exports.create = async (event) => {
+  const userEmail = event.requestContext.authorizer.principalId;
+  const { Progress, ContentUrl, CurrentLessonUrl, Done } =
+    JSON.parse(event.body) || null;
+
+  const missingParam = Object.keys(CourseCreateRequiredParams).find(
+    (param) => !eval(param)
+  );
+
+  if (missingParam) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        error: CourseCreateRequiredParams[missingParam],
+      }),
+    };
+  }
+
+  const connection = await connectionResolver();
+
+  // Use the connection
+  try {
+    const [rows] = await connection.query(
+      "INSERT INTO Course (Progress, CurrentLessonUrl, Done, User_Id) VALUES (?, ?, ?, ?)",
+      [Progress, CurrentLessonUrl, Done, userEmail]
+    );
+    return {
+      statusCode: 200,
+      body: JSON.stringify(rows),
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify(err),
+    };
+  }
+};
+
+// Update a course on Mysql DB on table courses
+module.exports.patch = async (event) => {
+  const userEmail = event.requestContext.authorizer.principalId;
+  const { id } = event.pathParameters || null;
+  if (!id) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Missing id parameter" }),
+    };
+  }
+
+  const connection = await connectionResolver();
+  // Use the connection
+  try {
+    const body = JSON.parse(event.body);
+
+    const fieldsNotAllowed = ["id", "User_Id"]; // Fields not allowed for update
+
+    const fieldsToUpdate = {};
+    Object.keys(body).forEach((key) => {
+      if (!fieldsNotAllowed.includes(key)) {
+        fieldsToUpdate[key] = body[key];
+      }
+    });
+
+    const updateQuery = `UPDATE Course SET ? WHERE Id = ? AND User_Id = ?`;
+    const updateParams = [fieldsToUpdate, id, userEmail];
+
+    connection.execute(updateQuery, updateParams);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "Course updated successfully" }),
+    };
+  } catch (error) {
+    console.error("Error updating course:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Failed to update course" }),
     };
   }
 };
