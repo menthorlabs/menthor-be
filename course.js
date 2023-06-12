@@ -7,10 +7,34 @@ const CourseCreateRequiredParams = {
   Done: "Missing Done",
 };
 
+const fieldsToDelete = [
+  "size",
+  "url",
+  "html_url",
+  "git_url",
+  "download_url",
+  "_links",
+  "sha",
+];
+
 const fetchSettings = {
   headers: {
     Authorization: `token ${process.env.GITHUB_TOKEN}`,
   },
+};
+
+const normalizePath = (path) => {
+  return path
+    .replace(/\d+\s/g, "")
+    .replace(/\//g, "-")
+    .replace(/\s/g, "-")
+    .replace(/-{3,}/g, "-")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+};
+
+const normalizeName = (name) => {
+  return name.replace(/\.[^/.]+$/, "").replace(/\d+\s-\s/g, "");
 };
 
 const connectionResolver = async () => {
@@ -51,6 +75,16 @@ async function recursiveFetchGithubDir(url) {
       for (const file of files) {
         const fileData = await fetchGithubContents(file.url);
         // delete fileData.content;
+        if (fileData.content && !file.name.endsWith(".png")) {
+          fileData.content = Buffer.from(fileData.content, "base64").toString(
+            "utf-8"
+          );
+        }
+        fieldsToDelete.forEach((field) => {
+          delete fileData[field];
+        });
+        fileData.name = normalizeName(fileData.name);
+        fileData.path = normalizePath(fileData.path);
         if (fileData) {
           map[file.name] = fileData;
         }

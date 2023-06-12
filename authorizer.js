@@ -17,9 +17,10 @@ function extractSessionIdFromCookie(Cookie) {
 }
 
 module.exports.handler = async (event) => {
-  const Cookie = event.headers.Cookie;
+  const Cookie = event.headers.Cookie || event.headers.Cookie;
   const sessionId = extractSessionIdFromCookie(Cookie);
-  const Authorization = event.headers.Authorization;
+  const Authorization =
+    event.headers.Authorization || event.headers.authorization;
   const splitPem = process.env.CLERK_JWT_VERIFICATION_KEY?.match(/.{1,64}/g);
   const publicKey =
     "-----BEGIN PUBLIC KEY-----\n" +
