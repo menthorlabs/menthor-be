@@ -92,6 +92,38 @@ module.exports.get = async (event) => {
   }
 };
 
+// Get lessons done by course id on Mysql DB on table lessons
+module.exports.getDoneByCourseId = async (event) => {
+  const userEmail = event.requestContext.authorizer.principalId;
+  const { id } = event.pathParameters || null;
+  if (!id) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Missing id parameter" }),
+    };
+  }
+
+  const connection = await connectionResolver();
+
+  // Use the connection
+  try {
+    const [rows] = await connection.query(
+      "SELECT * FROM Lesson WHERE Course_Id = ? AND User_Id = ? AND Done = 1",
+      [id, userEmail]
+    );
+    return {
+      statusCode: 200,
+      body: JSON.stringify(rows),
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify(err),
+    };
+  }
+};
+
 // Create lesson on Mysql DB on table lessons
 module.exports.create = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;

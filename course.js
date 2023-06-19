@@ -174,6 +174,32 @@ module.exports.get = async (event) => {
   }
 };
 
+// Get last accessed courses (UpdatedAt) on Mysql DB on table courses
+module.exports.getLastAccessed = async (event) => {
+  const userEmail = event.requestContext.authorizer.principalId;
+  const { size = 10 } = event.queryStringParameters || { size: 10 };
+
+  const connection = await connectionResolver();
+
+  // Use the connection
+  try {
+    const [rows] = await connection.query(
+      "SELECT * FROM Course WHERE User_Id = ? ORDER BY UpdatedAt DESC LIMIT ?",
+      [userEmail, parseInt(size)]
+    );
+    return {
+      statusCode: 200,
+      body: JSON.stringify(rows),
+    };
+  } catch (err) {
+    console.error(err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify(err),
+    };
+  }
+};
+
 module.exports.content = async (event) => {
   const { name } = event.queryStringParameters || null;
   const connection = await connectionResolver();
