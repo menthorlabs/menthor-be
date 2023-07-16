@@ -250,11 +250,11 @@ module.exports.content = async (event) => {
 // Create a new course on Mysql DB on table courses
 module.exports.create = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { Progress, ContentUrl, CurrentLessonUrl, Done } =
-    JSON.parse(event.body) || null;
+
+  const body = JSON.parse(event.body);
 
   const missingParam = Object.keys(CourseCreateRequiredParams).find(
-    (param) => !eval(param)
+    (param) => body[param] === undefined
   );
 
   if (missingParam) {
@@ -271,8 +271,14 @@ module.exports.create = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.query(
-      "INSERT INTO Course (Progress, ContentUrl, CurrentLessonUrl, Done, User_Id) VALUES (?, ?, ?, ?, ?)",
-      [Progress, ContentUrl, CurrentLessonUrl, Done, userEmail]
+      "INSERT INTO Course (Id, Progress, ContentUrl, CurrentLessonUrl, Done, User_Id) VALUES (UUID(), ?, ?, ?, ?, ?)",
+      [
+        body.Progress,
+        body.ContentUrl,
+        body.CurrentLessonUrl,
+        body.Done,
+        userEmail,
+      ]
     );
     return {
       statusCode: 200,

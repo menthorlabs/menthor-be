@@ -116,10 +116,10 @@ module.exports.get = async (event) => {
 // Create submission on Mysql DB on table submissions
 module.exports.create = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { Content, SubmissionType, SubmissionStatus, LessonUrl, Lesson_Id } =
-    JSON.parse(event.body) || null;
-  const missingParam = Object.keys(SubmissionCreateRequiredParams).find(
-    (param) => !eval(param)
+  const body = JSON.parse(event.body);
+
+  const missingParam = Object.keys(CourseCreateRequiredParams).find(
+    (param) => body[param] === undefined
   );
 
   if (missingParam) {
@@ -152,12 +152,12 @@ module.exports.create = async (event) => {
     connection.execute(
       "INSERT INTO Submission (Id, Content, SubmissionType, SubmissionStatus, LessonUrl, User_Id, Lesson_Id) VALUES (UUID(), ?, ?, ?, ?, ?, ?)",
       [
-        Content,
-        SubmissionType,
-        SubmissionStatus,
-        LessonUrl,
+        body.Content,
+        body.SubmissionType,
+        body.SubmissionStatus,
+        body.LessonUrl,
         userEmail,
-        Lesson_Id,
+        body.Lesson_Id,
       ]
     );
     return {

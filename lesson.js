@@ -128,11 +128,10 @@ module.exports.getDoneByCourseId = async (event) => {
 // Create lesson on Mysql DB on table lessons
 module.exports.create = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { Progress, TimeTrack, ContentUrl, Done, Course_Id } =
-    JSON.parse(event.body) || null;
+  const body = JSON.parse(event.body);
 
-  const missingParam = Object.keys(LessonCreateRequiredParams).find(
-    (param) => !eval(param)
+  const missingParam = Object.keys(CourseCreateRequiredParams).find(
+    (param) => body[param] === undefined
   );
 
   if (missingParam) {
@@ -150,7 +149,14 @@ module.exports.create = async (event) => {
   try {
     const [rows] = await connection.query(
       "INSERT INTO Lesson (Progress, TimeTrack, ContentUrl, Done, Course_Id, User_Id) VALUES (?, ?, ?, ?, ?, ?)",
-      [Progress, TimeTrack, ContentUrl, Done, Course_Id, userEmail]
+      [
+        body.Progress,
+        body.TimeTrack,
+        body.ContentUrl,
+        body.Done,
+        body.Course_Id,
+        userEmail,
+      ]
     );
     return {
       statusCode: 200,
