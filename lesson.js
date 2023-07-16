@@ -1,3 +1,4 @@
+const AWS = require("aws-sdk");
 const mysql = require("mysql2/promise");
 const CONNECTION = mysql.createConnection(process.env.DATABASE_URL);
 
@@ -63,8 +64,8 @@ module.exports.getAll = async (event) => {
 // Get lesson by id on Mysql DB on table lessons
 module.exports.get = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { id } = event.pathParameters || null;
-  if (!id) {
+  const { lessonId } = event.pathParameters || null;
+  if (!lessonId) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
@@ -77,7 +78,7 @@ module.exports.get = async (event) => {
   try {
     const [rows] = await connection.query(
       "SELECT * FROM Lesson WHERE Id = ? AND User_Id = ?",
-      [id, userEmail]
+      [lessonId, userEmail]
     );
     return {
       statusCode: 200,
@@ -167,8 +168,8 @@ module.exports.create = async (event) => {
 // Update lesson on Mysql DB on table lessons
 module.exports.patch = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { id } = event.pathParameters || null;
-  if (!id) {
+  const { lessonId } = event.pathParameters || null;
+  if (!lessonId) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
@@ -190,7 +191,7 @@ module.exports.patch = async (event) => {
     });
 
     const updateQuery = `UPDATE Lesson SET ? WHERE Id = ? AND User_Id = ?`;
-    const updateParams = [fieldsToUpdate, id, userEmail];
+    const updateParams = [fieldsToUpdate, lessonId, userEmail];
 
     connection.execute(updateQuery, updateParams);
 
@@ -203,6 +204,78 @@ module.exports.patch = async (event) => {
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Failed to update lesson" }),
+    };
+  }
+};
+
+// Set bool done on lesson on Mysql DB on table lessons, call this.getSignedUrlPromise and return signed url
+module.exports.setDone = async (event) => {
+  const userEmail = event.requestContext.authorizer.principalId;
+  const { lessonId } = event.pathParameters || null;
+  if (!lessonId) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Missing id parameter" }),
+    };
+  }
+
+  const connection = await connectionResolver();
+  // Use the connection
+  try {
+    const updateQuery = `UPDATE Lesson SET Done = true WHERE Id = ? AND User_Id = ?`;
+    const updateParams = [lessonId, userEmail];
+
+    await connection.execute(updateQuery, updateParams);
+
+    const presignedUrlResponse = await module.exports.getSignedUrlPromise();
+    const presignedUrl = JSON.parse(presignedUrlResponse.body);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ presignedUrl }),
+    };
+  } catch (error) {
+    console.error("Error setting lesson as done:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Failed to set lesson as done" }),
+    };
+  }
+};
+
+module.exports.getSignedUrlPromise = async () => {
+  const { v4: uuidv4 } = require("uuid");
+  const region = process.env.AWS_REGION;
+  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const bucketName = process.env.BUCKET_NAME;
+  const fileName = uuidv4();
+
+  // Configure AWS SDK
+  AWS.config.update({ region, accessKeyId, secretAccessKey });
+
+  const s3 = new AWS.S3();
+
+  const expirationTime = 900; // 15 minutes
+
+  const params = {
+    Bucket: bucketName,
+    Key: fileName,
+    Expires: expirationTime,
+    ContentType: "image/jpeg",
+    ACL: "private",
+  };
+
+  try {
+    const presignedUrl = await s3.getSignedUrlPromise("putObject", params);
+    return {
+      statusCode: 200,
+      body: presignedUrl,
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Error generating presigned URL" }),
     };
   }
 };

@@ -145,8 +145,8 @@ module.exports.getAll = async (event) => {
 // Get course by id on Mysql DB on table courses
 module.exports.get = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { id } = event.pathParameters || null;
-  if (!id) {
+  const { courseId } = event.pathParameters || null;
+  if (!courseId) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
@@ -157,9 +157,10 @@ module.exports.get = async (event) => {
 
   // Use the connection
   try {
+    console.log(courseId, userEmail);
     const [rows] = await connection.query(
       "SELECT * FROM Course WHERE Id = ? AND User_Id = ?",
-      [id, userEmail]
+      [courseId, userEmail]
     );
     return {
       statusCode: 200,
@@ -270,8 +271,8 @@ module.exports.create = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.query(
-      "INSERT INTO Course (Progress, CurrentLessonUrl, Done, User_Id) VALUES (?, ?, ?, ?)",
-      [Progress, CurrentLessonUrl, Done, userEmail]
+      "INSERT INTO Course (Progress, ContentUrl, CurrentLessonUrl, Done, User_Id) VALUES (?, ?, ?, ?, ?)",
+      [Progress, ContentUrl, CurrentLessonUrl, Done, userEmail]
     );
     return {
       statusCode: 200,
@@ -289,8 +290,8 @@ module.exports.create = async (event) => {
 // Update a course on Mysql DB on table courses
 module.exports.patch = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { id } = event.pathParameters || null;
-  if (!id) {
+  const { courseId } = event.pathParameters || null;
+  if (!courseId) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
@@ -312,7 +313,7 @@ module.exports.patch = async (event) => {
     });
 
     const updateQuery = `UPDATE Course SET ? WHERE Id = ? AND User_Id = ?`;
-    const updateParams = [fieldsToUpdate, id, userEmail];
+    const updateParams = [fieldsToUpdate, courseId, userEmail];
 
     connection.execute(updateQuery, updateParams);
 

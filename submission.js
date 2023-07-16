@@ -84,8 +84,8 @@ module.exports.getAll = async (event) => {
 // Get submission by id on Mysql DB on table submissions
 module.exports.get = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { id } = event.pathParameters || null;
-  if (!id) {
+  const { submissionId } = event.pathParameters || null;
+  if (!submissionId) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
@@ -98,7 +98,7 @@ module.exports.get = async (event) => {
   try {
     const [rows] = await connection.execute(
       "SELECT * FROM Submission WHERE Id = ? AND User_Id = ?",
-      [id, userEmail]
+      [submissionId, userEmail]
     );
     return {
       statusCode: 200,
@@ -176,8 +176,8 @@ module.exports.create = async (event) => {
 // Patch submission on Mysql DB on table submissions
 module.exports.patch = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { id } = event.pathParameters || null;
-  if (!id) {
+  const { submissionId } = event.pathParameters || null;
+  if (!submissionId) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
@@ -207,7 +207,7 @@ module.exports.patch = async (event) => {
     console.log("fieldsToUpdate", fieldsToUpdate);
 
     const updateQuery = `UPDATE Submission SET ? WHERE Id = ? AND User_Id = ?`;
-    const updateParams = [fieldsToUpdate, id, userEmail];
+    const updateParams = [fieldsToUpdate, submissionId, userEmail];
 
     connection.execute(updateQuery, updateParams);
 

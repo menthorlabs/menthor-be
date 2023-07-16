@@ -53,8 +53,8 @@ module.exports.getAll = async (event) => {
 
 // Get roadmap by id on Mysql DB on table roadmaps
 module.exports.get = async (event) => {
-  const { id } = event.pathParameters || null;
-  if (!id) {
+  const { roadmapId } = event.pathParameters || null;
+  if (!roadmapId) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
@@ -67,7 +67,7 @@ module.exports.get = async (event) => {
   try {
     const [rows] = await connection.query(
       "SELECT * FROM Roadmap WHERE id = ?",
-      [id]
+      [roadmapId]
     );
     return {
       statusCode: 200,
