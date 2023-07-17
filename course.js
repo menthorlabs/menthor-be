@@ -270,19 +270,36 @@ module.exports.create = async (event) => {
 
   // Use the connection
   try {
-    const [rows] = await connection.query(
-      "INSERT INTO Course (Id, Progress, ContentUrl, CurrentLessonUrl, Done, User_Id) VALUES (UUID(), ?, ?, ?, ?, ?)",
+    const [_] = await connection.query(
+      `INSERT INTO Course (Id, Progress, ContentUrl, CurrentLessonUrl, Done, User_Id)
+        SELECT UUID(), ?, ?, ?, ?, ?
+        FROM dual
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM Course
+          WHERE ContentUrl = ? AND User_Id = ?
+        );`,
       [
         body.Progress,
         body.ContentUrl,
         body.CurrentLessonUrl,
         body.Done,
         userEmail,
+        body.ContentUrl,
+        userEmail,
       ]
     );
+
+    if (_.affectedRows === 0) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Course already exists" }),
+      };
+    }
+
     return {
       statusCode: 200,
-      body: JSON.stringify(rows),
+      body: JSON.stringify({ message: "Course created successfully" }),
     };
   } catch (err) {
     console.error(err);
