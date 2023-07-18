@@ -2,8 +2,8 @@ const mysql = require("mysql2/promise");
 const CONNECTION = mysql.createConnection(process.env.DATABASE_URL);
 
 const CourseCreateRequiredParams = {
-  Progress: "Missing Progress",
-  CurrentLessonUrl: "Missing ContentUrl",
+  ContentId: "Missing ContentId",
+  TimeTrack: "Missing TimeTrack",
   Done: "Missing Done",
 };
 
@@ -201,52 +201,6 @@ module.exports.getLastAccessed = async (event) => {
   }
 };
 
-module.exports.content = async (event) => {
-  const { name } = event.queryStringParameters || null;
-  const connection = await connectionResolver();
-
-  if (!name) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Missing name parameter" }),
-    };
-  }
-
-  try {
-    const [rows] = await connection.query(
-      "SELECT * FROM GitCache WHERE Term = ? LIMIT 1",
-      [name]
-    );
-    if (rows.length === 0) {
-      const root = `https://api.github.com/repos/menthorlabs/Menthor-Aulas/contents/${name}`;
-
-      const data = await recursiveFetchGithubDir(root);
-
-      if (data) {
-        connection.query("INSERT INTO GitCache (Term, Value) VALUES (?, ?)", [
-          name,
-          JSON.stringify(data),
-        ]);
-      }
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify(data),
-      };
-    }
-    return {
-      statusCode: 200,
-      body: JSON.stringify(rows[0].Value),
-    };
-  } catch (err) {
-    console.error(err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify(err),
-    };
-  }
-};
-
 // Create a new course on Mysql DB on table courses
 module.exports.create = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
@@ -271,22 +225,23 @@ module.exports.create = async (event) => {
   // Use the connection
   try {
     const [_] = await connection.query(
-      `INSERT INTO Course (Id, Progress, ContentUrl, CurrentLessonUrl, Done, User_Id)
-        SELECT UUID(), ?, ?, ?, ?, ?
+      `INSERT INTO Course (Id, ContentId, TimeTrack, Done, User_Id, Lessons, CurrentLessonId)
+        SELECT UUID(), ?, ?, ?, ?, ?, ?
         FROM dual
         WHERE NOT EXISTS (
           SELECT 1
           FROM Course
-          WHERE ContentUrl = ? AND User_Id = ?
+          WHERE ContentId = ? AND User_Id = ?
         );`,
       [
-        body.Progress,
-        body.ContentUrl,
-        body.CurrentLessonUrl,
+        body.ContentId,
+        body.TimeTrack,
         body.Done,
         userEmail,
         body.ContentUrl,
         userEmail,
+        body.Lessons,
+        body.CurrentLessonId,
       ]
     );
 
@@ -326,7 +281,7 @@ module.exports.patch = async (event) => {
   try {
     const body = JSON.parse(event.body);
 
-    const fieldsNotAllowed = ["id", "User_Id"]; // Fields not allowed for update
+    const fieldsNotAllowed = ["Id", "User_Id", "ContentId"]; // Fields not allowed for update
 
     const fieldsToUpdate = {};
     Object.keys(body).forEach((key) => {

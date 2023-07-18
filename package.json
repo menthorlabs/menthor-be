@@ -19,6 +19,7 @@
     "@clerk/clerk-sdk-node": "^4.10.1",
     "jsonwebtoken": "^9.0.0",
     "mailgun-js": "^0.22.0",
+    "middy": "^0.36.0",
     "mysql2": "^3.3.3",
     "serverless-mysql": "^1.5.5",
     "uuid": "^9.0.0"

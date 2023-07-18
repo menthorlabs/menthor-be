@@ -1,4 +1,4 @@
-const Mailgun = require('mailgun-js');
+const Mailgun = require("mailgun-js");
 
 const mailgun = Mailgun({
   apiKey: process.env.MAILGUN_API_KEY,
@@ -13,7 +13,7 @@ function validateEmail(email) {
 module.exports.send = async (event) => {
   const { content, to, subject } = JSON.parse(event.body);
   const emailData = {
-    from: 'Menthor <noreply@menthor.io>',
+    from: "Menthor <noreply@menthor.io>",
     to: to,
     subject: subject,
     text: content,
@@ -25,16 +25,16 @@ module.exports.send = async (event) => {
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: 'Email sent successfully',
+        message: "Email sent successfully",
       }),
     };
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error("Error sending email:", error);
 
     return {
       statusCode: 500,
       body: JSON.stringify({
-        message: 'Error sending email',
+        message: "Error sending email",
         error: error.message,
       }),
     };
@@ -47,9 +47,13 @@ module.exports.addToMailingList = async (event) => {
   // Validate the email address
   if (!email || !validateEmail(email)) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({
-        message: 'Invalid email address',
+        message: "Invalid email address",
       }),
     };
   }
@@ -61,18 +65,26 @@ module.exports.addToMailingList = async (event) => {
     });
 
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify({
-        message: 'Email added to the mailing list',
+        message: "Email added to the mailing list",
       }),
     };
   } catch (error) {
-    console.error('Error adding email to the mailing list:', error);
+    console.error("Error adding email to the mailing list:", error);
 
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify({
-        message: 'Error adding email to the mailing list',
+        message: "Error adding email to the mailing list",
         error: error.message,
       }),
     };
@@ -89,13 +101,13 @@ module.exports.sendEmailToMailingList = async (event) => {
     return {
       statusCode: 400,
       body: JSON.stringify({
-        message: 'Invalid subject or text',
+        message: "Invalid subject or text",
       }),
     };
   }
 
   const emailData = {
-    from: 'Menthor <noreply@menthor.io>',
+    from: "Menthor <noreply@menthor.io>",
     to: process.env.MAILGUN_LIST_ADDRESS,
     subject: subject,
     text: text,
@@ -107,16 +119,16 @@ module.exports.sendEmailToMailingList = async (event) => {
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: 'Email sent to the mailing list',
+        message: "Email sent to the mailing list",
       }),
     };
   } catch (error) {
-    console.error('Error sending email to the mailing list:', error);
+    console.error("Error sending email to the mailing list:", error);
 
     return {
       statusCode: 500,
       body: JSON.stringify({
-        message: 'Error sending email to the mailing list',
+        message: "Error sending email to the mailing list",
         error: error.message,
       }),
     };
