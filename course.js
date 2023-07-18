@@ -145,8 +145,9 @@ module.exports.getAll = async (event) => {
 // Get course by id on Mysql DB on table courses
 module.exports.get = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { courseId } = event.pathParameters || null;
-  if (!courseId) {
+  const { id: contentId } = event.pathParameters || null;
+
+  if (!contentId) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
@@ -157,10 +158,10 @@ module.exports.get = async (event) => {
 
   // Use the connection
   try {
-    console.log(courseId, userEmail);
+    console.log(contentId, userEmail);
     const [rows] = await connection.query(
-      "SELECT * FROM Course WHERE Id = ? AND User_Id = ?",
-      [courseId, userEmail]
+      "SELECT * FROM Course WHERE ContentId = ? AND User_Id = ?",
+      [contentId, userEmail]
     );
     return {
       statusCode: 200,
@@ -268,7 +269,7 @@ module.exports.create = async (event) => {
 // Update a course on Mysql DB on table courses
 module.exports.patch = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { courseId } = event.pathParameters || null;
+  const { id: courseId } = event.pathParameters || null;
   if (!courseId) {
     return {
       statusCode: 400,
