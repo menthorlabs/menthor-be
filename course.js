@@ -269,7 +269,8 @@ module.exports.create = async (event) => {
 // Update a course on Mysql DB on table courses
 module.exports.patch = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { id: courseId } = event.pathParameters || null;
+  const { courseId } = event.pathParameters || null;
+  console.log(courseId);
   if (!courseId) {
     return {
       statusCode: 400,
@@ -291,11 +292,15 @@ module.exports.patch = async (event) => {
       }
     });
 
-    const updateQuery = `UPDATE Course SET ? WHERE Id = ? AND User_Id = ?`;
-    const updateParams = [fieldsToUpdate, courseId, userEmail];
+    const updateQuery = `UPDATE Course SET ${Object.keys(fieldsToUpdate)
+      .map((key) => `${key} = ?`)
+      .join(", ")} WHERE Id = ? AND User_Id = ?`;
 
-    connection.execute(updateQuery, updateParams);
+    const updateValues = Object.values(fieldsToUpdate);
+    updateValues.push(courseId);
+    updateValues.push(userEmail);
 
+    connection.query(updateQuery, updateValues);
     return {
       statusCode: 200,
       body: JSON.stringify({ message: "Course updated successfully" }),
