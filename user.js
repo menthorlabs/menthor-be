@@ -43,7 +43,6 @@ const webhookSampleCreated = {
   object: "event",
   type: "user.created",
 };
-
 const webhookSampleUpdated = {
   data: {
     birthday: "",
@@ -160,10 +159,22 @@ module.exports.webhook = async (event, context) => {
 
     try {
       const user = clerkToDb(body.data);
-      const [rows] = await connection.query("UPDATE User SET ? WHERE Id = ?", [
-        user,
-        user.Id,
-      ]);
+
+      const fieldsToUpdate = {};
+      Object.keys(user).forEach((key) => {
+        if (!fieldsNotAllowed.includes(key)) {
+          fieldsToUpdate[key] = body[key];
+        }
+      });
+
+      const updateQuery = `UPDATE User SET ${Object.keys(fieldsToUpdate)
+        .map((key) => `${key} = ?`)
+        .join(", ")} WHERE Id = ?`;
+
+      const updateValues = Object.values(fieldsToUpdate);
+      updateValues.push(user.Id);
+
+      connection.query(updateQuery, updateValues);
       return {
         statusCode: 200,
         body: JSON.stringify(rows),
