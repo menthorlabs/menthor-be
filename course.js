@@ -269,7 +269,7 @@ module.exports.create = async (event) => {
 // Update a course on Mysql DB on table courses
 module.exports.patch = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { courseId } = event.pathParameters || null;
+  const { id: courseId } = event.pathParameters || null;
   console.log(courseId);
   if (!courseId) {
     return {
@@ -291,6 +291,10 @@ module.exports.patch = async (event) => {
         fieldsToUpdate[key] = body[key];
       }
     });
+
+    if(fieldsToUpdate.lessons?.length > 0) {
+      fieldsToUpdate.lessons = JSON.stringify(fieldsToUpdate.lessons)
+    }
 
     const updateQuery = `UPDATE Course SET ${Object.keys(fieldsToUpdate)
       .map((key) => `${key} = ?`)
