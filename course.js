@@ -226,8 +226,8 @@ module.exports.create = async (event) => {
   // Use the connection
   try {
     const [_] = await connection.query(
-      `INSERT INTO Course (Id, ContentId, TimeTrack, Done, User_Id, Lessons, CurrentLessonId)
-        SELECT UUID(), ?, ?, ?, ?, ?, ?
+      `INSERT INTO Course (Id, ContentId, TimeTrack, Done, User_Id, Lessons, CurrentLessonId, EnrollStatus)
+        SELECT UUID(), ?, ?, ?, ?, ?, ?, ?
         FROM dual
         WHERE NOT EXISTS (
           SELECT 1
@@ -243,6 +243,7 @@ module.exports.create = async (event) => {
         userEmail,
         body.Lessons,
         body.CurrentLessonId,
+        body.EnrollStatus,
       ]
     );
 
@@ -291,8 +292,8 @@ module.exports.patch = async (event) => {
       }
     });
 
-    if(fieldsToUpdate.lessons?.length > 0) {
-      fieldsToUpdate.lessons = JSON.stringify(fieldsToUpdate.lessons)
+    if (fieldsToUpdate.lessons?.length > 0) {
+      fieldsToUpdate.lessons = JSON.stringify(fieldsToUpdate.lessons);
     }
 
     const updateQuery = `UPDATE Course SET ${Object.keys(fieldsToUpdate)

@@ -56,7 +56,7 @@ const AvailableRoles = [
   },
 ];
 
-const getToken = async () => {
+const getToken = async (code) => {
   try {
     const url = `${API_ENDPOINT}/oauth2/token`;
     const response = await axios.post(
@@ -79,15 +79,16 @@ const getToken = async () => {
   }
 };
 
-const getDiscordUser = async () => {
-  const token = await getToken();
-
+const getDiscordUser = async (code) => {
+  const token = await getToken(code);
   if (!token) {
     return {
       statusCode: 500,
       body: JSON.stringify({ message: "Error getting token" }),
     };
   }
+
+  console.log(token);
 
   try {
     const url = `${API_ENDPOINT}/users/@me`;
@@ -132,7 +133,15 @@ module.exports.leave = async (event, context) => {
 };
 
 module.exports.addRole = async (event, context) => {
-  const user = await getDiscordUser();
+  const body = JSON.parse(event.body);
+  const code = body.code;
+  if (!code) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: "Invalid token" }),
+    };
+  }
+  const user = await getDiscordUser(code);
   const config = {
     headers: {
       Authorization: `Bot ${process.env.BOT_TOKEN}`,
