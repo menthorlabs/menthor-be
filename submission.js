@@ -204,12 +204,19 @@ module.exports.patch = async (event) => {
       }
     });
 
-    console.log("fieldsToUpdate", fieldsToUpdate);
+    if (fieldsToUpdate.lessons?.length > 0) {
+      fieldsToUpdate.lessons = JSON.stringify(fieldsToUpdate.lessons);
+    }
 
-    const updateQuery = `UPDATE Submission SET ? WHERE Id = ? AND User_Id = ?`;
-    const updateParams = [fieldsToUpdate, submissionId, userEmail];
+    const updateQuery = `UPDATE Submission SET ${Object.keys(fieldsToUpdate)
+      .map((key) => `${key} = ?`)
+      .join(", ")} WHERE Id = ? AND User_Id = ?`;
 
-    connection.execute(updateQuery, updateParams);
+    const updateValues = Object.values(fieldsToUpdate);
+    updateValues.push(submissionId);
+    updateValues.push(userEmail);
+
+    connection.query(updateQuery, updateValues);
 
     return {
       statusCode: 200,

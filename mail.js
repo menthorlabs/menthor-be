@@ -43,6 +43,12 @@ module.exports.send = async (event) => {
 
 module.exports.addToMailingList = async (event) => {
   const { email } = JSON.parse(event.body);
+  const emailData = {
+    from: "Menthor <noreply@menthor.io>",
+    to: email,
+    subject: "Bem vindo ao Menthor",
+    template: "signup",
+  };
 
   // Validate the email address
   if (!email || !validateEmail(email)) {
@@ -63,6 +69,9 @@ module.exports.addToMailingList = async (event) => {
     await mailgun.lists(process.env.MAILGUN_LIST_ADDRESS).members().create({
       address: email,
     });
+
+    // send welcome e-mail
+    await mailgun.messages().send(emailData);
 
     return {
       headers: {
