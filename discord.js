@@ -20,6 +20,10 @@ const AvailableRoles = [
     flags: 0,
   },
   {
+    id: "1134875198244536350",
+    name: "dapp-com-ethereum",
+  },
+  {
     id: "1121857528058364084",
     name: "novo cargo",
     description: null,

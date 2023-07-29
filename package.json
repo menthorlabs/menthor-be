@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@clerk/clerk-sdk-node": "^4.10.1",
+    "axios": "^1.4.0",
     "jsonwebtoken": "^9.0.0",
     "mailgun-js": "^0.22.0",
     "middy": "^0.36.0",
