@@ -84,8 +84,8 @@ module.exports.getAll = async (event) => {
 // Get submission by id on Mysql DB on table submissions
 module.exports.get = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { submissionId } = event.pathParameters || null;
-  if (!submissionId) {
+  const { submissionId: lessonId } = event.pathParameters || null;
+  if (!lessonId) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
@@ -97,8 +97,8 @@ module.exports.get = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.execute(
-      "SELECT * FROM Submission WHERE Id = ? AND User_Id = ?",
-      [submissionId, userEmail]
+      "SELECT * FROM Submission WHERE Lesson_Id = ? AND User_Id = ?",
+      [lessonId, userEmail]
     );
     return {
       statusCode: 200,
@@ -118,7 +118,7 @@ module.exports.create = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
   const body = JSON.parse(event.body);
 
-  const missingParam = Object.keys(CourseCreateRequiredParams).find(
+  const missingParam = Object.keys(SubmissionCreateRequiredParams).find(
     (param) => body[param] === undefined
   );
 
@@ -131,14 +131,14 @@ module.exports.create = async (event) => {
     };
   }
 
-  if (!validateSubmissionType(SubmissionType)) {
+  if (!validateSubmissionType(body.SubmissionType)) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Invalid SubmissionType" }),
     };
   }
 
-  if (!validateSubmissionStatus(SubmissionStatus)) {
+  if (!validateSubmissionStatus(body.SubmissionStatus)) {
     return {
       statusCode: 400,
       body: JSON.stringify({ error: "Invalid SubmissionStatus" }),
