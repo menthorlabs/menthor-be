@@ -56,21 +56,22 @@ const AvailableRoles = [
   },
 ];
 
-const getToken = async (code) => {
+const getToken = async (code, uri) => {
   try {
     const url = `${API_ENDPOINT}/oauth2/token`;
-    const response = await axios.post(
-      url,
-      `grant_type=client_credentials&scope=guilds%20identify%20email%20connections`,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Basic ${Buffer.from(
-            `${CLIENT_ID}:${CLIENT_SECRET}`
-          ).toString("base64")}`,
-        },
-      }
-    );
+    const data = new URLSearchParams();
+    data.append("client_id", CLIENT_ID);
+    data.append("client_secret", CLIENT_SECRET);
+    data.append("grant_type", "authorization_code");
+    data.append("code", code);
+    data.append("redirect_uri", uri);
+    data.append("scope", "guilds identify email connections");
+
+    const response = await axios.post(url, data, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
 
     return response.data.access_token;
   } catch (error) {
@@ -87,9 +88,6 @@ const getDiscordUser = async (code) => {
       body: JSON.stringify({ message: "Error getting token" }),
     };
   }
-
-  console.log(token);
-
   try {
     const url = `${API_ENDPOINT}/users/@me`;
     const response = await axios.get(url, {
@@ -135,13 +133,14 @@ module.exports.leave = async (event, context) => {
 module.exports.addRole = async (event, context) => {
   const body = JSON.parse(event.body);
   const code = body.code;
-  if (!code) {
+  const uri = body.redirectUri;
+  if (!code || !uri) {
     return {
       statusCode: 400,
       body: JSON.stringify({ message: "Invalid token" }),
     };
   }
-  const user = await getDiscordUser(code);
+  const user = await getDiscordUser(code, uri);
   const config = {
     headers: {
       Authorization: `Bot ${process.env.BOT_TOKEN}`,
