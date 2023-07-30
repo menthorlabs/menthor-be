@@ -160,9 +160,13 @@ module.exports.create = async (event) => {
         body.Lesson_Id,
       ]
     );
+    const url = await getSignedUrlPromise();
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Submission created successfully" }),
+      body: JSON.stringify({
+        message: "Submission created successfully",
+        url: url,
+      }),
     };
   } catch (err) {
     console.error(err);

@@ -305,6 +305,21 @@ module.exports.patch = async (event) => {
     updateValues.push(userEmail);
 
     connection.query(updateQuery, updateValues);
+
+    // Check if course body has only has lessons and no other property on it if so, return getSignedUrlPromise
+    if (
+      Object.keys(fieldsToUpdate).length === 1 &&
+      Object.keys(fieldsToUpdate)[0] === "lessons"
+    ) {
+      const signedUrl = await getSignedUrlPromise();
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          message: "Course updated successfully",
+          signedUrl,
+        }),
+      };
+    }
     return {
       statusCode: 200,
       body: JSON.stringify({ message: "Course updated successfully" }),
@@ -314,6 +329,40 @@ module.exports.patch = async (event) => {
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Failed to update course" }),
+    };
+  }
+};
+
+const getSignedUrlPromise = async () => {
+  const { v4: uuidv4 } = require("uuid");
+  const region = process.env.AWS_REGION;
+  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const bucketName = process.env.BUCKET_NAME;
+  const fileName = uuidv4();
+
+  // Configure AWS SDK
+  AWS.config.update({ region, accessKeyId, secretAccessKey });
+
+  const s3 = new AWS.S3();
+
+  const expirationTime = 900; // 15 minutes
+
+  const params = {
+    Bucket: bucketName,
+    Key: fileName,
+    Expires: expirationTime,
+    ContentType: "image/jpeg",
+    ACL: "private",
+  };
+
+  try {
+    const presignedUrl = await s3.getSignedUrlPromise("putObject", params);
+    return presignedUrl;
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Error generating presigned URL" }),
     };
   }
 };
