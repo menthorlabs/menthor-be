@@ -80,8 +80,8 @@ const getToken = async (code, uri) => {
   }
 };
 
-const getDiscordUser = async (code) => {
-  const token = await getToken(code);
+const getDiscordUser = async (code, uri) => {
+  const token = await getToken(code, uri);
   if (!token) {
     return {
       statusCode: 500,
