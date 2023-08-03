@@ -28,9 +28,9 @@ const SubmissionStatus = new Set([
 const getSignedUrlPromise = async () => {
   const { v4: uuidv4 } = require("uuid");
   const fileName = uuidv4();
-  const region = process.env.AWS_REGION;
-  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const region = process.env.AWS_REG;
+  const accessKeyId = process.env.AWS_AKID;
+  const secretAccessKey = process.env.AWS_SAK;
   const bucketName = process.env.BUCKET_NAME;
 
   const clientParams = {
@@ -59,9 +59,9 @@ const getSignedUrlPromise = async () => {
 
 const searchFileAndDelete = async (path) => {
   const clientParams = {
-    region: process.env.AWS_REGION,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REG,
+    accessKeyId: process.env.AWS_AKID,
+    secretAccessKey: process.env.AWS_SAK,
   };
   const bucketName = process.env.BUCKET_NAME;
   const client = new S3Client(clientParams);
