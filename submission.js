@@ -20,6 +20,7 @@ const SubmissionStatus = new Set([
   "Rejected",
   "Pending",
   "Draft",
+  "Done",
   "ChangesRequested",
 ]);
 

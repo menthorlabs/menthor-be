@@ -242,7 +242,7 @@ module.exports.create = async (event) => {
         body.Done,
         userEmail,
         body.ContentUrl,
-        userEmail,
+        body.CurrentLessonId,
         body.Lessons,
         body.CurrentLessonId,
         body.EnrollStatus,
