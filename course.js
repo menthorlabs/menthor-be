@@ -243,9 +243,9 @@ module.exports.create = async (event) => {
         userEmail,
         body.ContentUrl,
         body.CurrentLessonId,
+        body.EnrollStatus,
         body.Lessons,
         body.CurrentLessonId,
-        body.EnrollStatus,
       ]
     );
 
