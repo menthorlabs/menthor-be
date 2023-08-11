@@ -366,6 +366,7 @@ module.exports.requestSubmissionUrl = async (event) => {
       body: JSON.stringify({
         message: "Submission url generated successfully",
         url: url,
+        fileName: url.fileName,
       }),
     };
   } catch (error) {
