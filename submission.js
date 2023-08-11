@@ -28,7 +28,7 @@ const SubmissionStatus = new Set([
 
 const getSignedUrlPromise = async () => {
   const { v4: uuidv4 } = require("uuid");
-  const fileName = uuidv4();
+  const fileName = `${uuidv4()}.jpg`;
   const region = process.env.AWS_REG;
   const accessKeyId = process.env.AWS_AKID;
   const secretAccessKey = process.env.AWS_SAK;
@@ -43,6 +43,7 @@ const getSignedUrlPromise = async () => {
     Bucket: bucketName,
     Key: fileName,
     ContentType: "image/jpeg",
+    ACL: "public-read",
   };
 
   try {
