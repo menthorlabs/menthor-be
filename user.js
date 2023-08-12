@@ -112,6 +112,16 @@ const connectionResolver = async () => {
   }
 };
 
+const fieldsAllowed = [
+  "Username",
+  "Email",
+  "Name",
+  "ImageUrl",
+  "Tags",
+  "Ranks",
+  "Badges",
+];
+
 const clerkToDb = (clerkUser) => {
   return {
     Id: clerkUser.id,
@@ -161,9 +171,10 @@ module.exports.webhook = async (event, context) => {
       const user = clerkToDb(body.data);
 
       const fieldsToUpdate = {};
+
       Object.keys(user).forEach((key) => {
-        if (!fieldsNotAllowed.includes(key)) {
-          fieldsToUpdate[key] = body[key];
+        if (fieldsAllowed.includes(key) && user[key] != null) {
+          fieldsToUpdate[key] = user[key];
         }
       });
 
@@ -174,7 +185,7 @@ module.exports.webhook = async (event, context) => {
       const updateValues = Object.values(fieldsToUpdate);
       updateValues.push(user.Id);
 
-      connection.query(updateQuery, updateValues);
+      const [rows] = await connection.query(updateQuery, updateValues);
       return {
         statusCode: 200,
         body: JSON.stringify(rows),
