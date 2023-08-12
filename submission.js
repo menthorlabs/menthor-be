@@ -26,9 +26,9 @@ const SubmissionStatus = new Set([
 
 // Util Functions
 
-const getSignedUrlPromise = async () => {
+const getSignedUrlPromise = async (ContentType) => {
   const { v4: uuidv4 } = require("uuid");
-  const fileName = `${uuidv4()}.jpg`;
+  const fileName = `${uuidv4()}`;
   const region = process.env.AWS_REG;
   const accessKeyId = process.env.AWS_AKID;
   const secretAccessKey = process.env.AWS_SAK;
@@ -42,7 +42,7 @@ const getSignedUrlPromise = async () => {
   const putObjectParams = {
     Bucket: bucketName,
     Key: fileName,
-    ContentType: "image/jpeg",
+    ContentType,
     ACL: "public-read",
   };
 
@@ -321,6 +321,10 @@ module.exports.patch = async (event) => {
 module.exports.requestSubmissionUrl = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
   const { submissionId } = event.pathParameters || null;
+  const body = JSON.parse(event.body);
+
+  const ContentType = body.contentType || "image/jpeg";
+
   if (!submissionId) {
     return {
       statusCode: 400,
@@ -353,7 +357,7 @@ module.exports.requestSubmissionUrl = async (event) => {
       }
     }
 
-    const url = await getSignedUrlPromise();
+    const url = await getSignedUrlPromise(ContentType);
 
     connection.query("UPDATE Submission SET Filename = ? WHERE Id = ?", [
       url.fileName,
