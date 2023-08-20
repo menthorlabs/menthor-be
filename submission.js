@@ -109,7 +109,6 @@ const checkSubmissionLimit = async (userId, lessonId) => {
     "SELECT COUNT(*) FROM Submission WHERE User_Id = ? AND Lesson_Id = ?",
     [userId, lessonId]
   );
-  console.log(rows);
   return rows[0]["count(*)"] >= 5;
 };
 
@@ -137,12 +136,20 @@ module.exports.getAll = async (event) => {
       [userEmail, (page - 1) * size, parseInt(size)]
     );
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify(rows),
     };
   } catch (err) {
     console.error(err);
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify(err),
     };
@@ -155,6 +162,10 @@ module.exports.get = async (event) => {
   const { submissionId: lessonId } = event.pathParameters || null;
   if (!lessonId) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
     };
@@ -169,12 +180,20 @@ module.exports.get = async (event) => {
       [lessonId, userEmail]
     );
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify(rows),
     };
   } catch (err) {
     console.error(err);
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify(err),
     };
@@ -192,6 +211,10 @@ module.exports.create = async (event) => {
 
   if (missingParam) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({
         error: SubmissionCreateRequiredParams[missingParam],
@@ -201,6 +224,10 @@ module.exports.create = async (event) => {
 
   if (!validateSubmissionType(body.SubmissionType)) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({ error: "Invalid SubmissionType" }),
     };
@@ -208,6 +235,10 @@ module.exports.create = async (event) => {
 
   if (!validateSubmissionStatus(body.SubmissionStatus)) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({ error: "Invalid SubmissionStatus" }),
     };
@@ -220,6 +251,10 @@ module.exports.create = async (event) => {
 
   if (isUnderSubmissionLimit) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({ error: "Submission limit reached" }),
     };
@@ -244,6 +279,10 @@ module.exports.create = async (event) => {
       ]
     );
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify({
         message: "Submission created successfully",
@@ -253,6 +292,10 @@ module.exports.create = async (event) => {
   } catch (err) {
     console.error(err);
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify(err),
     };
@@ -327,6 +370,10 @@ module.exports.requestSubmissionUrl = async (event) => {
 
   if (!submissionId) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
     };
@@ -342,6 +389,10 @@ module.exports.requestSubmissionUrl = async (event) => {
 
     if (rows.length === 0) {
       return {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         statusCode: 404,
         body: JSON.stringify({ error: "Submission not found" }),
       };
@@ -366,6 +417,10 @@ module.exports.requestSubmissionUrl = async (event) => {
     ]);
 
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify({
         message: "Submission url generated successfully",
@@ -376,6 +431,10 @@ module.exports.requestSubmissionUrl = async (event) => {
   } catch (error) {
     console.error("Error generating submission url:", error);
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify({ error: "Failed to generate submission url" }),
     };

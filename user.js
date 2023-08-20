@@ -140,6 +140,10 @@ module.exports.webhook = async (event, context) => {
   //   if request origin is not from clerk, return error
   if (event.headers["x-clerk-webhook-secret"] !== process.env.CLERK_SECRET) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 401,
       body: JSON.stringify({ error: "Unauthorized" }),
     };
@@ -154,12 +158,20 @@ module.exports.webhook = async (event, context) => {
       const user = clerkToDb(body.data);
       const [rows] = await connection.query("INSERT INTO User SET ?", user);
       return {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         statusCode: 200,
         body: JSON.stringify(rows),
       };
     } catch (err) {
       console.error(err);
       return {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         statusCode: 500,
         body: JSON.stringify(err),
       };
@@ -187,12 +199,20 @@ module.exports.webhook = async (event, context) => {
 
       const [rows] = await connection.query(updateQuery, updateValues);
       return {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         statusCode: 200,
         body: JSON.stringify(rows),
       };
     } catch (err) {
       console.error(err);
       return {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         statusCode: 500,
         body: JSON.stringify(err),
       };
@@ -205,18 +225,30 @@ module.exports.webhook = async (event, context) => {
         body.data.id,
       ]);
       return {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         statusCode: 200,
         body: JSON.stringify(rows),
       };
     } catch (err) {
       console.error(err);
       return {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         statusCode: 500,
         body: JSON.stringify(err),
       };
     }
   } else {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify({}),
     };
@@ -233,12 +265,20 @@ module.exports.get = async (event, context) => {
       [id, id]
     );
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify(rows),
     };
   } catch (err) {
     console.error(err);
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify(err),
     };

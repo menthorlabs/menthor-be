@@ -132,6 +132,10 @@ module.exports.getAll = async (event) => {
       [userEmail, (page - 1) * size, parseInt(size)]
     );
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify(rows),
     };
@@ -166,6 +170,10 @@ module.exports.get = async (event) => {
       [courseId, userEmail]
     );
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify(rows),
     };
@@ -192,12 +200,20 @@ module.exports.getLastAccessed = async (event) => {
       [userEmail, parseInt(size)]
     );
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify(rows),
     };
   } catch (err) {
     console.error(err);
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify(err),
     };
@@ -216,6 +232,10 @@ module.exports.create = async (event) => {
 
   if (missingParam) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({
         error: CourseCreateRequiredParams[missingParam],
@@ -251,18 +271,30 @@ module.exports.create = async (event) => {
 
     if (_.affectedRows === 0) {
       return {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Credentials": true,
+        },
         statusCode: 400,
         body: JSON.stringify({ error: "Course already exists" }),
       };
     }
 
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify({ message: "Course created successfully" }),
     };
   } catch (err) {
     console.error(err);
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify(err),
     };
@@ -308,12 +340,20 @@ module.exports.patch = async (event) => {
 
     connection.query(updateQuery, updateValues);
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify({ message: "Course updated successfully" }),
     };
   } catch (error) {
     console.error("Error updating course:", error);
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify({ error: "Failed to update course" }),
     };

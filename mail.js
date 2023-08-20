@@ -23,6 +23,10 @@ module.exports.send = async (event) => {
     await mailgun.messages().send(emailData);
 
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify({
         message: "Email sent successfully",
@@ -32,6 +36,10 @@ module.exports.send = async (event) => {
     console.error("Error sending email:", error);
 
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify({
         message: "Error sending email",

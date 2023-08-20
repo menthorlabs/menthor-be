@@ -84,6 +84,10 @@ const getDiscordUser = async (code, uri) => {
   const token = await getToken(code, uri);
   if (!token) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify({ message: "Error getting token" }),
     };
@@ -107,6 +111,10 @@ module.exports.requestRole = async (event, context) => {
   const roleId = event.pathParameters.roleId;
   if (!AvailableRoles.find((role) => role.id === roleId)) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({ message: "Invalid role" }),
     };
@@ -121,6 +129,10 @@ module.exports.leave = async (event, context) => {
   const roleId = event.body.roleId;
   if (!AvailableRoles.find((role) => role.id === roleId)) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({ message: "Invalid role" }),
     };
@@ -136,6 +148,10 @@ module.exports.addRole = async (event, context) => {
   const uri = body.redirectUri;
   if (!code || !uri) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({ message: "Invalid token" }),
     };
@@ -161,12 +177,20 @@ module.exports.addRole = async (event, context) => {
     await axios.put(url, {}, config);
 
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify({ message: "Role added successfully" }),
     };
   } catch (error) {
     console.error(error);
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify({ message: "Error adding role" }),
     };
@@ -195,11 +219,19 @@ module.exports.removeRole = async (event, context) => {
     await axios.delete(url, config);
 
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify({ message: "Role removed successfully" }),
     };
   } catch (error) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify({ message: "Error removing role" }),
     };

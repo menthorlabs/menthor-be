@@ -39,6 +39,10 @@ module.exports.getAll = async (event) => {
       [(page - 1) * size, parseInt(size)]
     );
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify(results),
     };
@@ -56,6 +60,10 @@ module.exports.get = async (event) => {
   const { roadmapId } = event.pathParameters || null;
   if (!roadmapId) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 400,
       body: JSON.stringify({ error: "Missing id parameter" }),
     };
@@ -70,12 +78,20 @@ module.exports.get = async (event) => {
       [roadmapId]
     );
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 200,
       body: JSON.stringify(rows),
     };
   } catch (err) {
     console.error(err);
     return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       statusCode: 500,
       body: JSON.stringify(err),
     };
