@@ -138,7 +138,9 @@ const clerkToDb = (clerkUser) => {
 // Clerks webhook for create, update and delete user
 module.exports.webhook = async (event, context) => {
   //   if request origin is not from clerk, return error
-  if (event.headers["x-clerk-webhook-secret"] !== process.env.CLERK_SECRET) {
+  if (
+    event.headers["x-clerk-webhook-secret"] !== process.env.CLERK_SECRET_KEY
+  ) {
     return {
       headers: {
         "Access-Control-Allow-Origin": "*",
@@ -256,14 +258,15 @@ module.exports.webhook = async (event, context) => {
 };
 
 module.exports.get = async (event, context) => {
-  const id = event.pathParameters.id;
+  const userId = event.pathParameters.userId;
 
   const connection = await connectionResolver();
   try {
     const [rows] = await connection.query(
       "SELECT ImageUrl, Name, Tags, Ranks, Badges FROM User WHERE Id = ? or Username = ?",
-      [id, id]
+      [userId, userId]
     );
+
     return {
       headers: {
         "Access-Control-Allow-Origin": "*",

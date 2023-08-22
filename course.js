@@ -1,42 +1,10 @@
 const mysql = require("mysql2/promise");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const CONNECTION = mysql.createConnection(process.env.DATABASE_URL);
 
 const CourseCreateRequiredParams = {
   ContentId: "Missing ContentId",
   TimeTrack: "Missing TimeTrack",
   Done: "Missing Done",
-};
-
-const fieldsToDelete = [
-  "size",
-  "url",
-  "html_url",
-  "git_url",
-  "download_url",
-  "_links",
-  "sha",
-];
-
-const fetchSettings = {
-  headers: {
-    Authorization: `token ${process.env.GITHUB_TOKEN}`,
-  },
-};
-
-const normalizePath = (path) => {
-  return path
-    .replace(/\d+\s/g, "")
-    .replace(/\//g, "-")
-    .replace(/\s/g, "-")
-    .replace(/-{3,}/g, "-")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-};
-
-const normalizeName = (name) => {
-  return name.replace(/\.[^/.]+$/, "").replace(/\d+\s-\s/g, "");
 };
 
 const connectionResolver = async () => {
@@ -55,60 +23,6 @@ const connectionResolver = async () => {
     }
   }
 };
-
-async function recursiveFetchGithubDir(url) {
-  const map = {};
-  try {
-    const response = await fetch(url, fetchSettings);
-    const data = await response.json();
-    const directories = data.filter((item) => item.type === "dir");
-    const files = data.filter((item) => item.type === "file");
-
-    if (directories && directories.length > 0) {
-      for (const directory of directories) {
-        const dirData = await recursiveFetchGithubDir(directory.url);
-        if (dirData) {
-          map[directory.name] = dirData;
-        }
-      }
-    }
-
-    if (files && files.length > 0) {
-      for (const file of files) {
-        const fileData = await fetchGithubContents(file.url);
-        // delete fileData.content;
-        if (fileData.content && !file.name.endsWith(".png")) {
-          fileData.content = Buffer.from(fileData.content, "base64").toString(
-            "utf-8"
-          );
-        }
-        fieldsToDelete.forEach((field) => {
-          delete fileData[field];
-        });
-        fileData.name = normalizeName(fileData.name);
-        fileData.path = normalizePath(fileData.path);
-        if (fileData) {
-          map[file.name] = fileData;
-        }
-      }
-    }
-
-    return map;
-  } catch (error) {
-    console.error("An error occurred:", error);
-    return null;
-  }
-}
-
-async function fetchGithubContents(url) {
-  try {
-    const response = await fetch(url, fetchSettings);
-    return await response.json();
-  } catch (error) {
-    console.error("An error occurred:", error);
-    return null;
-  }
-}
 
 // Get all courses on Mysql DB on table courses paginated
 module.exports.getAll = async (event) => {

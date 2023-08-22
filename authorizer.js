@@ -17,37 +17,22 @@ function extractSessionIdFromCookie(Cookie) {
 }
 
 module.exports.handler = async (event) => {
-  const Cookie = event.headers.Cookie || event.headers.Cookie;
-  const sessionId = extractSessionIdFromCookie(Cookie);
   const Authorization =
-    event.headers.Authorization || event.headers.authorization;
+    event.headers?.Authorization ||
+    event.headers?.authorization ||
+    event.authorizationToken;
   const splitPem = process.env.CLERK_JWT_VERIFICATION_KEY?.match(/.{1,64}/g);
   const publicKey =
     "-----BEGIN PUBLIC KEY-----\n" +
     splitPem?.join("\n") +
     "\n-----END PUBLIC KEY-----";
-
-  if (!sessionId && !Authorization) {
+  if (!Authorization) {
     throw Error("Not Signed In");
   }
   try {
-    const jwt = sessionId || Authorization.split(" ")[1];
-    if (jwt === "MENTHOR-DEV" && process.env.NODE_ENV === "development") {
-      return {
-        principalId: "beb6c8dd-fd94-11ed-95f4-ce3d95a8e965",
-        policyDocument: {
-          Version: "2012-10-17",
-          Statement: [
-            {
-              Action: "execute-api:Invoke",
-              Effect: "Allow",
-              Resource: event.methodArn,
-            },
-          ],
-        },
-      };
-    }
+    const jwt = Authorization.split(" ")[1];
     const decoded = verify(jwt, publicKey);
+    console.log(decoded);
     return {
       principalId: decoded.email,
       policyDocument: {
@@ -62,6 +47,7 @@ module.exports.handler = async (event) => {
       },
     };
   } catch (error) {
+    console.error(error);
     throw Error("Unauthorized");
   }
 };
