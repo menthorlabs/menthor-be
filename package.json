@@ -25,6 +25,7 @@
     "mailgun-js": "^0.22.0",
     "middy": "^0.36.0",
     "mysql2": "^3.3.3",
+    "resend": "^1.0.0",
     "serverless-mysql": "^1.5.5",
     "uuid": "^9.0.0"
   }

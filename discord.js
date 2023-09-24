@@ -21,7 +21,11 @@ const AvailableRoles = [
   },
   {
     id: "1134875198244536350",
-    name: "dapp-com-ethereum",
+    name: "twitter-decentralizado",
+  },
+  {
+    id: "1154384585937916075",
+    name: "html-basico",
   },
   {
     id: "1121857528058364084",
@@ -142,7 +146,7 @@ module.exports.leave = async (event, context) => {
   return await module.exports.removeRole(event, context);
 };
 
-module.exports.addRole = async (event, context) => {
+module.exports.addRole = async (event, _context) => {
   const body = JSON.parse(event.body);
   const code = body.code;
   const uri = body.redirectUri;
