@@ -1,100 +1,6 @@
 const mysql = require("mysql2/promise");
 const CONNECTION = mysql.createConnection(process.env.DATABASE_URL);
 
-const webhookSampleCreated = {
-  data: {
-    birthday: "",
-    created_at: 1654012591514,
-    email_addresses: [
-      {
-        email_address: "example@example.org",
-        id: "idn_29w83yL7CwVlJXylYLxcslromF1",
-        linked_to: [],
-        object: "email_address",
-        verification: {
-          status: "verified",
-          strategy: "ticket",
-        },
-      },
-    ],
-    external_accounts: [],
-    external_id: "567772",
-    first_name: "Example",
-    gender: "",
-    id: "user_29w83sxmDNGwOuEthce5gg56FcC",
-    image_url: "https://img.clerk.com/xxxxxx",
-    last_name: "Example",
-    last_sign_in_at: 1654012591514,
-    object: "user",
-    password_enabled: true,
-    phone_numbers: [],
-    primary_email_address_id: "idn_29w83yL7CwVlJXylYLxcslromF1",
-    primary_phone_number_id: null,
-    primary_web3_wallet_id: null,
-    private_metadata: {},
-    profile_image_url: "https://www.gravatar.com/avatar?d=mp",
-    public_metadata: {},
-    two_factor_enabled: false,
-    unsafe_metadata: {},
-    updated_at: 1654012591835,
-    username: null,
-    web3_wallets: [],
-  },
-  object: "event",
-  type: "user.created",
-};
-const webhookSampleUpdated = {
-  data: {
-    birthday: "",
-    created_at: 1654012591514,
-    email_addresses: [
-      {
-        email_address: "example@example.org",
-        id: "idn_29w83yL7CwVlJXylYLxcslromF1",
-        linked_to: [],
-        object: "email_address",
-        verification: {
-          status: "verified",
-          strategy: "admin",
-        },
-      },
-    ],
-    external_accounts: [],
-    external_id: null,
-    first_name: "Example",
-    gender: "",
-    id: "user_29w83sxmDNGwOuEthce5gg56FcC",
-    image_url: "https://img.clerk.com/xxxxxx",
-    last_name: null,
-    last_sign_in_at: null,
-    object: "user",
-    password_enabled: true,
-    phone_numbers: [],
-    primary_email_address_id: "idn_29w83yL7CwVlJXylYLxcslromF1",
-    primary_phone_number_id: null,
-    primary_web3_wallet_id: null,
-    private_metadata: {},
-    profile_image_url: "https://www.gravatar.com/avatar?d=mp",
-    public_metadata: {},
-    two_factor_enabled: false,
-    unsafe_metadata: {},
-    updated_at: 1654012824306,
-    username: null,
-    web3_wallets: [],
-  },
-  object: "event",
-  type: "user.updated",
-};
-const webhookSampleDeleted = {
-  data: {
-    deleted: true,
-    id: "user_29wBMCtzATuFJut8jO2VNTVekS4",
-    object: "user",
-  },
-  object: "event",
-  type: "user.deleted",
-};
-
 const connectionResolver = async () => {
   if (CONNECTION && CONNECTION.state !== "disconnected") {
     return CONNECTION;
@@ -136,11 +42,8 @@ const clerkToDb = (clerkUser) => {
 };
 
 // Clerks webhook for create, update and delete user
-module.exports.webhook = async (event, context) => {
-  //   if request origin is not from clerk, return error
-  if (
-    event.headers["x-clerk-webhook-secret"] !== process.env.CLERK_SECRET_KEY
-  ) {
+module.exports.webhook = async (event, _context) => {
+  if (event.headers["X-Clerk-Webhook-Key"] !== process.env.CLERK_WEBHOOK_KEY) {
     return {
       headers: {
         "Access-Control-Allow-Origin": "*",
@@ -150,7 +53,6 @@ module.exports.webhook = async (event, context) => {
       body: JSON.stringify({ error: "Unauthorized" }),
     };
   }
-
   const body = JSON.parse(event.body);
 
   if (body.type === "user.created") {
@@ -159,6 +61,25 @@ module.exports.webhook = async (event, context) => {
     try {
       const user = clerkToDb(body.data);
       const [rows] = await connection.query("INSERT INTO User SET ?", user);
+      // const [count] = await connection.query("SELECT COUNT(*) FROM User");
+
+      // if (count[0]["count(*)"] <= 1000) {
+      //   const publicMetadata = {
+      //     badges: ["FIRST_1000"],
+      //   };
+
+      //   await fetch(`https://api.clerk.com/v1/users/${user.Id}/metadata`, {
+      //     method: "PATCH",
+      //     headers: {
+      //       Authorization: `Bearer ${process.env.CLERK_KEY}`,
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+      //       public_metadata: publicMetadata,
+      //     }),
+      //   });
+      // }
+
       return {
         headers: {
           "Access-Control-Allow-Origin": "*",
@@ -257,7 +178,7 @@ module.exports.webhook = async (event, context) => {
   }
 };
 
-module.exports.get = async (event, context) => {
+module.exports.get = async (event, _context) => {
   const userId = event.pathParameters.userId;
 
   const connection = await connectionResolver();

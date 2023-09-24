@@ -1,11 +1,11 @@
-const mysql = require("mysql2/promise");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
 } = require("@aws-sdk/client-s3");
-const CONNECTION = mysql.createConnection(process.env.DATABASE_URL);
+
+const connectionResolver = require("./database");
 
 const SubmissionCreateRequiredParams = {
   SubmissionType: "Missing SubmissionType",
@@ -35,14 +35,16 @@ const getSignedUrlPromise = async (ContentType) => {
   const bucketName = process.env.BUCKET_NAME;
 
   const clientParams = {
+    credentials: {
+      accessKeyId: accessKeyId,
+      secretAccessKey: secretAccessKey,
+    },
     region,
-    accessKeyId,
-    secretAccessKey,
   };
   const putObjectParams = {
     Bucket: bucketName,
     Key: fileName,
-    ContentType,
+    ContentType: ContentType,
     ACL: "public-read",
   };
 
@@ -85,23 +87,6 @@ function validateSubmissionType(type) {
 function validateSubmissionStatus(status) {
   return SubmissionStatus.has(status);
 }
-
-const connectionResolver = async () => {
-  if (CONNECTION && CONNECTION.state !== "disconnected") {
-    return CONNECTION;
-  } else {
-    CONNECTION = mysql.createConnection(connectionString);
-    CONNECTION.query = util.promisify(CONNECTION.query);
-
-    try {
-      await CONNECTION.connect();
-      return CONNECTION;
-    } catch (err) {
-      console.error("Database connection failed: ", err.stack);
-      throw err;
-    }
-  }
-};
 
 const checkSubmissionLimit = async (userId, lessonId) => {
   const connection = await connectionResolver();
@@ -350,12 +335,20 @@ module.exports.patch = async (event) => {
 
     return {
       statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({ message: "Submission updated successfully" }),
     };
   } catch (error) {
     console.error("Error updating submission:", error);
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
       body: JSON.stringify({ error: "Failed to update submission" }),
     };
   }

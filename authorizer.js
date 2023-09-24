@@ -2,21 +2,23 @@
 
 const verify = require("jsonwebtoken").verify;
 
-function extractSessionIdFromCookie(Cookie) {
-  if (!Cookie) {
-    return null;
-  }
-  const regexPattern = /(?<=__session=)[^;]+/;
-  const match = Cookie.match(regexPattern);
-
-  if (match) {
-    const result = match[0];
-    return result;
-  }
-  return null;
-}
-
 module.exports.handler = async (event) => {
+  if (process.env.NODE_ENV === "development") {
+    return {
+      principalId: "email@email.com",
+      policyDocument: {
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Action: "execute-api:Invoke",
+            Effect: "Allow",
+            Resource: event.methodArn,
+          },
+        ],
+      },
+    };
+  }
+
   const Authorization =
     event.headers?.Authorization ||
     event.headers?.authorization ||
@@ -32,7 +34,6 @@ module.exports.handler = async (event) => {
   try {
     const jwt = Authorization.split(" ")[1];
     const decoded = verify(jwt, publicKey);
-    console.log(decoded);
     return {
       principalId: decoded.email,
       policyDocument: {

@@ -1,6 +1,4 @@
-const AWS = require("aws-sdk");
-const mysql = require("mysql2/promise");
-const CONNECTION = mysql.createConnection(process.env.DATABASE_URL);
+const connectionResolver = require("./database");
 
 const LessonCreateRequiredParams = {
   Progress: "Missing Progress",
@@ -8,23 +6,6 @@ const LessonCreateRequiredParams = {
   ContentUrl: "Missing ContentUrl",
   Done: "Missing Done",
   Course_Id: "Missing Course_Id",
-};
-
-const connectionResolver = async () => {
-  if (CONNECTION && CONNECTION.state !== "disconnected") {
-    return CONNECTION;
-  } else {
-    CONNECTION = mysql.createConnection(connectionString);
-    CONNECTION.query = util.promisify(CONNECTION.query);
-
-    try {
-      await CONNECTION.connect();
-      return CONNECTION;
-    } catch (err) {
-      console.error("Database connection failed: ", err.stack);
-      throw err;
-    }
-  }
 };
 
 // Get all lessons on Mysql DB on table lessons paginated
