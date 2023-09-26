@@ -4,29 +4,36 @@
   "description": "",
   "main": "handler.js",
   "scripts": {
-    "serve": "serverless offline",
-    "serve:watch": "nodemon -e js,ts,jsx,tsx,yml -x yarn run serve"
+    "lint": "eslint . --ignore-pattern 'node_modules/'",
+    "lint:fix": "eslint . --ignore-pattern 'node_modules/' --fix",
+    "serve": "serverless offline --config serverless-demo.yml",
+    "serve:watch": "nodemon -e js,ts,jsx,tsx,yml -x yarn run serve",
+    "deploy": "serverless deploy --config serverless-prod.yml",
+    "deploy:dev": "serverless deploy --config serverless-dev.yml"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.2",
+    "@types/uuid": "^9.0.4",
+    "eslint": "^8.50.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-prettier": "^5.0.0",
     "nodemon": "^2.0.22",
+    "prettier": "^3.0.3",
     "serverless-domain-manager": "^7.1.2",
     "serverless-offline": "^12.0.4"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.379.1",
     "@aws-sdk/s3-request-presigner": "^3.385.0",
-    "@clerk/clerk-sdk-node": "^4.10.1",
     "axios": "^1.4.0",
     "jsonwebtoken": "^9.0.0",
-    "mailgun-js": "^0.22.0",
-    "middy": "^0.36.0",
     "mysql2": "^3.3.3",
     "resend": "^1.0.0",
-    "serverless-mysql": "^1.5.5",
     "uuid": "^9.0.0"
   }
 }

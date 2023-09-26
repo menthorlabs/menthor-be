@@ -1,11 +1,11 @@
-const connectionResolver = require("./database");
+const connectionResolver = require('./database');
 
 const LessonCreateRequiredParams = {
-  Progress: "Missing Progress",
-  TimeTrack: "Missing TimeTrack",
-  ContentUrl: "Missing ContentUrl",
-  Done: "Missing Done",
-  Course_Id: "Missing Course_Id",
+  Progress: 'Missing Progress',
+  TimeTrack: 'Missing TimeTrack',
+  ContentUrl: 'Missing ContentUrl',
+  Done: 'Missing Done',
+  Course_Id: 'Missing Course_Id',
 };
 
 // Get all lessons on Mysql DB on table lessons paginated
@@ -16,8 +16,8 @@ module.exports.getAll = async (event) => {
     size: 10,
   };
 
-  page = parseInt(page);
-  size = parseInt(size);
+  page = parseInt(page, 10);
+  size = parseInt(size, 10);
 
   size = size > 20 ? 20 : size;
 
@@ -26,13 +26,13 @@ module.exports.getAll = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.query(
-      "SELECT * FROM Lesson WHERE User_Id = ? LIMIT ?, ?",
-      [userEmail, (page - 1) * size, parseInt(size)]
+      'SELECT * FROM Lesson WHERE User_Id = ? LIMIT ?, ?',
+      [userEmail, (page - 1) * size, parseInt(size, 10)],
     );
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
       body: JSON.stringify(rows),
@@ -41,8 +41,8 @@ module.exports.getAll = async (event) => {
     console.error(err);
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 500,
       body: JSON.stringify(err),
@@ -57,11 +57,11 @@ module.exports.get = async (event) => {
   if (!lessonId) {
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 400,
-      body: JSON.stringify({ error: "Missing id parameter" }),
+      body: JSON.stringify({ error: 'Missing id parameter' }),
     };
   }
 
@@ -70,13 +70,13 @@ module.exports.get = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.query(
-      "SELECT * FROM Lesson WHERE Id = ? AND User_Id = ?",
-      [lessonId, userEmail]
+      'SELECT * FROM Lesson WHERE Id = ? AND User_Id = ?',
+      [lessonId, userEmail],
     );
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
       body: JSON.stringify(rows),
@@ -85,8 +85,8 @@ module.exports.get = async (event) => {
     console.error(err);
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 500,
       body: JSON.stringify(err),
@@ -101,11 +101,11 @@ module.exports.getDoneByCourseId = async (event) => {
   if (!id) {
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 400,
-      body: JSON.stringify({ error: "Missing id parameter" }),
+      body: JSON.stringify({ error: 'Missing id parameter' }),
     };
   }
 
@@ -114,13 +114,13 @@ module.exports.getDoneByCourseId = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.query(
-      "SELECT * FROM Lesson WHERE Course_Id = ? AND User_Id = ? AND Done = 1",
-      [id, userEmail]
+      'SELECT * FROM Lesson WHERE Course_Id = ? AND User_Id = ? AND Done = 1',
+      [id, userEmail],
     );
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
       body: JSON.stringify(rows),
@@ -129,8 +129,8 @@ module.exports.getDoneByCourseId = async (event) => {
     console.error(err);
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 500,
       body: JSON.stringify(err),
@@ -143,15 +143,15 @@ module.exports.create = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
   const body = JSON.parse(event.body);
 
-  const missingParam = Object.keys(CourseCreateRequiredParams).find(
-    (param) => body[param] === undefined
+  const missingParam = Object.keys(LessonCreateRequiredParams).find(
+    (param) => body[param] === undefined,
   );
 
   if (missingParam) {
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 400,
       body: JSON.stringify({
@@ -165,7 +165,7 @@ module.exports.create = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.query(
-      "INSERT INTO Lesson (Progress, TimeTrack, ContentUrl, Done, Course_Id, User_Id) VALUES (?, ?, ?, ?, ?, ?)",
+      'INSERT INTO Lesson (Progress, TimeTrack, ContentUrl, Done, Course_Id, User_Id) VALUES (?, ?, ?, ?, ?, ?)',
       [
         body.Progress,
         body.TimeTrack,
@@ -173,12 +173,12 @@ module.exports.create = async (event) => {
         body.Done,
         body.Course_Id,
         userEmail,
-      ]
+      ],
     );
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
       body: JSON.stringify(rows),
@@ -187,8 +187,8 @@ module.exports.create = async (event) => {
     console.error(err);
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 500,
       body: JSON.stringify(err),
@@ -203,11 +203,11 @@ module.exports.patch = async (event) => {
   if (!lessonId) {
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 400,
-      body: JSON.stringify({ error: "Missing id parameter" }),
+      body: JSON.stringify({ error: 'Missing id parameter' }),
     };
   }
 
@@ -216,7 +216,7 @@ module.exports.patch = async (event) => {
   try {
     const body = JSON.parse(event.body);
 
-    const fieldsNotAllowed = ["Id", "User_Id", "Course_Id"]; // Fields not allowed for update
+    const fieldsNotAllowed = ['Id', 'User_Id', 'Course_Id']; // Fields not allowed for update
 
     const fieldsToUpdate = {};
     Object.keys(body).forEach((key) => {
@@ -225,28 +225,28 @@ module.exports.patch = async (event) => {
       }
     });
 
-    const updateQuery = `UPDATE Lesson SET ? WHERE Id = ? AND User_Id = ?`;
+    const updateQuery = 'UPDATE Lesson SET ? WHERE Id = ? AND User_Id = ?';
     const updateParams = [fieldsToUpdate, lessonId, userEmail];
 
     connection.execute(updateQuery, updateParams);
 
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
-      body: JSON.stringify({ message: "Lesson updated successfully" }),
+      body: JSON.stringify({ message: 'Lesson updated successfully' }),
     };
   } catch (error) {
-    console.error("Error updating lesson:", error);
+    console.error('Error updating lesson:', error);
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to update lesson" }),
+      body: JSON.stringify({ error: 'Failed to update lesson' }),
     };
   }
 };

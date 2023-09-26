@@ -1,0 +1,312 @@
+org: menhtorlabs
+app: menthor-lambda-api
+service: menthor-lambda-api
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  memorySize: 192
+  timeout: 10
+  stage: dev
+  region: sa-east-1
+  httpApi:
+    authorizers:
+      customAuthorizer:
+        type: request
+        functionName: custom-authorizer
+  environment:
+    GUILD_ID: 
+    CLIENT_ID: 
+    BOT_SECRET: 
+    BOT_TOKEN: 
+    NODE_ENV: 
+    GITHUB_TOKEN: 
+    AWS_REG: 
+    AWS_AKID: 
+    AWS_SAK: 
+    BUCKET_NAME: 
+    CLERK_SECRET_KEY: 
+    CLERK_KEY: 
+    CLERK_JWT_VERIFICATION_KEY: 
+    DATABASE_URL: mysql://...
+
+functions:
+  custom-authorizer:
+    handler: src/authorizer.handler # Updated the handler path
+    
+  # User Functions
+  webhook:
+    handler: src/user.webhook # Updated the handler path
+    events:
+      - http:
+          path: users/webhook
+          method: post
+          cors: true
+
+  user:
+    handler: src/user.get # Updated the handler path
+    events:
+      - http:
+          path: users/{userId}
+          method: get
+          cors: true
+
+  # Discord Functions
+  requestRole:
+    handler: src/discord.requestRole # Updated the handler path
+    events:
+      - http:
+          path: discord/request-role/{roleId}
+          method: post
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  leaveRole:
+    handler: src/discord.leave # Updated the handler path
+    events:
+      - http:
+          path: discord/leave/{roleId}
+          method: post
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  # Database Functions
+  # Lesson - Functions
+  lesson:
+    handler: src/lesson.get # Updated the handler path
+    events:
+      - http:
+          path: lessons/{lessonId}
+          method: get
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  getDoneByCourseId:
+    handler: src/lesson.getDoneByCourseId # Updated the handler path
+    events:
+      - http:
+          path: lessons/done/course/{lessonCourseId}
+          method: get
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  lessonGetAll:
+    handler: src/lesson.getAll # Updated the handler path
+    events:
+      - http:
+          path: lesson
+          method: get
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  createLesson:
+    handler: src/lesson.create # Updated the handler path
+    events:
+      - http:
+          path: lessons
+          method: post
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  patchLesson:
+    handler: src/lesson.patch # Updated the handler path
+    events:
+      - http:
+          path: lessons/{lessonId}
+          method: patch
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  # Course - Functions
+  courseContent:
+    handler: src/course.content # Updated the handler path
+    events:
+      - http:
+          path: utils/coursescontent
+          method: get
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  course:
+    handler: src/course.get # Updated the handler path
+    events:
+      - http:
+          path: courses/{courseId}
+          method: get
+          cors: true
+          request:
+            parameters:
+              paths:
+                courseId: true
+          authorizer:
+            name: custom-authorizer
+            scopes:
+              - user.id
+              - user.email
+  getLastAccessed:
+    handler: src/course.getLastAccessed # Updated the handler path
+    events:
+      - http:
+          path: utils/lastaccessedcourses
+          method: get
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  courseGetAll:
+    handler: src/course.getAll # Updated the handler path
+    events:
+      - http:
+          path: courses
+          method: get
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  createCourse:
+    handler: src/course.create # Updated the handler path
+    events:
+      - http:
+          path: courses
+          method: post
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  patchCourse:
+    handler: src/course.patch # Updated the handler path
+    timeout: 30
+    events:
+      - http:
+          path: courses/{courseId}
+          method: patch
+          cors: true
+          request:
+            parameters:
+              paths:
+                courseId: true
+          authorizer:
+            name: custom-authorizer
+            scopes:
+              - user.id
+              - user.email
+  # Submission - Functions
+  createSubmission:
+    handler: src/submission.create # Updated the handler path
+    events:
+      - http:
+          path: submissions
+          method: post
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  requestSubmissionUrlDuplicate:
+    handler: src/submission.test # Updated the handler path
+    events:
+      - http:
+          path: submissions/test
+          method: post
+          cors: true
+  patchSubmission:
+    handler: src/submission.patch # Updated the handler path
+    events:
+      - http:
+          path: submissions/{submissionId}
+          method: patch
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  submission:
+    handler: src/submission.get # Updated the handler path
+    events:
+      - http:
+          path: submissions/{submissionId}
+          method: get
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  submissionGetAll:
+    handler: src/submission.getAll # Updated the handler path
+    events:
+      - http:
+          path: submissions
+          method: get
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  requestSubmissionUrl:
+    handler: src/submission.requestSubmissionUrl # Updated the handler path
+    events:
+      - http:
+          path: submissions/request-url/{submissionId}
+          method: post
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  # Roadmap - Functions
+  roadmap:
+    handler: src/roadmap.get # Updated the handler path
+    events:
+      - http:
+          path: roadmaps/{roadmapId}
+          method: get
+          cors: true
+
+  roadmapGetAll:
+    handler: src/roadmap.getAll # Updated the handler path
+    events:
+      - http:
+          path: roadmaps
+          method: get
+          cors: true
+
+plugins:
+  - serverless-offline
+  # - serverless-domain-manager
+  # - serverless-plugin-typescript

@@ -1,4 +1,4 @@
-const connectionResolver = require("./database");
+const connectionResolver = require('./database');
 
 // Get all roadmaps on Mysql DB on table roadmaps paginated
 module.exports.getAll = async (event) => {
@@ -7,8 +7,8 @@ module.exports.getAll = async (event) => {
     size: 10,
   };
 
-  page = parseInt(page);
-  size = parseInt(size);
+  page = parseInt(page, 10);
+  size = parseInt(size, 10);
 
   size = size > 20 ? 20 : size;
 
@@ -17,13 +17,13 @@ module.exports.getAll = async (event) => {
   // Use the connection
   try {
     const [results] = await connection.query(
-      "SELECT * FROM Roadmap LIMIT ?, ?",
-      [(page - 1) * size, parseInt(size)]
+      'SELECT * FROM Roadmap LIMIT ?, ?',
+      [(page - 1) * size, parseInt(size, 10)],
     );
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
       body: JSON.stringify(results),
@@ -43,11 +43,11 @@ module.exports.get = async (event) => {
   if (!roadmapId) {
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 400,
-      body: JSON.stringify({ error: "Missing id parameter" }),
+      body: JSON.stringify({ error: 'Missing id parameter' }),
     };
   }
 
@@ -56,13 +56,13 @@ module.exports.get = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.query(
-      "SELECT * FROM Roadmap WHERE id = ?",
-      [roadmapId]
+      'SELECT * FROM Roadmap WHERE id = ?',
+      [roadmapId],
     );
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
       body: JSON.stringify(rows),
@@ -71,8 +71,8 @@ module.exports.get = async (event) => {
     console.error(err);
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 500,
       body: JSON.stringify(err),

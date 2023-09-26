@@ -1,9 +1,9 @@
-const connectionResolver = require("./database");
+const connectionResolver = require('./database');
 
 const CourseCreateRequiredParams = {
-  ContentId: "Missing ContentId",
-  TimeTrack: "Missing TimeTrack",
-  Done: "Missing Done",
+  ContentId: 'Missing ContentId',
+  TimeTrack: 'Missing TimeTrack',
+  Done: 'Missing Done',
 };
 
 // Get all courses on Mysql DB on table courses paginated
@@ -14,8 +14,8 @@ module.exports.getAll = async (event) => {
     size: 10,
   };
 
-  page = parseInt(page);
-  size = parseInt(size);
+  page = parseInt(page, 10);
+  size = parseInt(size, 10);
 
   size = size > 20 ? 20 : size;
 
@@ -24,13 +24,13 @@ module.exports.getAll = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.query(
-      "SELECT * FROM Course WHERE User_Id = ? LIMIT ?, ?",
-      [userEmail, (page - 1) * size, parseInt(size)]
+      'SELECT * FROM Course WHERE User_Id = ? LIMIT ?, ?',
+      [userEmail, (page - 1) * size, parseInt(size, 10)],
     );
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
       body: JSON.stringify(rows),
@@ -52,7 +52,7 @@ module.exports.get = async (event) => {
   if (!courseId) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: "Missing id parameter" }),
+      body: JSON.stringify({ error: 'Missing id parameter' }),
     };
   }
 
@@ -62,13 +62,13 @@ module.exports.get = async (event) => {
   try {
     console.log(courseId, userEmail);
     const [rows] = await connection.query(
-      "SELECT * FROM Course WHERE ContentId = ? AND User_Id = ?",
-      [courseId, userEmail]
+      'SELECT * FROM Course WHERE ContentId = ? AND User_Id = ?',
+      [courseId, userEmail],
     );
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
       body: JSON.stringify(rows),
@@ -92,13 +92,13 @@ module.exports.getLastAccessed = async (event) => {
   // Use the connection
   try {
     const [rows] = await connection.query(
-      "SELECT * FROM Course WHERE User_Id = ? ORDER BY UpdatedAt DESC LIMIT ?",
-      [userEmail, parseInt(size)]
+      'SELECT * FROM Course WHERE User_Id = ? ORDER BY UpdatedAt DESC LIMIT ?',
+      [userEmail, parseInt(size, 10)],
     );
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
       body: JSON.stringify(rows),
@@ -107,8 +107,8 @@ module.exports.getLastAccessed = async (event) => {
     console.error(err);
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 500,
       body: JSON.stringify(err),
@@ -123,14 +123,14 @@ module.exports.create = async (event) => {
   const body = JSON.parse(event.body);
 
   const missingParam = Object.keys(CourseCreateRequiredParams).find(
-    (param) => body[param] === undefined
+    (param) => body[param] === undefined,
   );
 
   if (missingParam) {
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 400,
       body: JSON.stringify({
@@ -162,34 +162,34 @@ module.exports.create = async (event) => {
         body.EnrollStatus,
         body.Lessons,
         body.CurrentLessonId,
-      ]
+      ],
     );
 
     if (_.affectedRows === 0) {
       return {
         headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
         },
         statusCode: 400,
-        body: JSON.stringify({ error: "Course already exists" }),
+        body: JSON.stringify({ error: 'Course already exists' }),
       };
     }
 
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
-      body: JSON.stringify({ message: "Course created successfully" }),
+      body: JSON.stringify({ message: 'Course created successfully' }),
     };
   } catch (err) {
     console.error(err);
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 500,
       body: JSON.stringify(err),
@@ -204,7 +204,7 @@ module.exports.patch = async (event) => {
   if (!courseId) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: "Missing id parameter" }),
+      body: JSON.stringify({ error: 'Missing id parameter' }),
     };
   }
 
@@ -213,7 +213,7 @@ module.exports.patch = async (event) => {
   try {
     const body = JSON.parse(event.body);
 
-    const fieldsNotAllowed = ["Id", "User_Id", "ContentId"]; // Fields not allowed for update
+    const fieldsNotAllowed = ['Id', 'User_Id', 'ContentId']; // Fields not allowed for update
 
     const fieldsToUpdate = {};
     Object.keys(body).forEach((key) => {
@@ -228,7 +228,7 @@ module.exports.patch = async (event) => {
 
     const updateQuery = `UPDATE Course SET ${Object.keys(fieldsToUpdate)
       .map((key) => `${key} = ?`)
-      .join(", ")} WHERE Id = ? AND User_Id = ?`;
+      .join(', ')} WHERE Id = ? AND User_Id = ?`;
 
     const updateValues = Object.values(fieldsToUpdate);
     updateValues.push(courseId);
@@ -237,21 +237,21 @@ module.exports.patch = async (event) => {
     connection.query(updateQuery, updateValues);
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
-      body: JSON.stringify({ message: "Course updated successfully" }),
+      body: JSON.stringify({ message: 'Course updated successfully' }),
     };
   } catch (error) {
-    console.error("Error updating course:", error);
+    console.error('Error updating course:', error);
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to update course" }),
+      body: JSON.stringify({ error: 'Failed to update course' }),
     };
   }
 };

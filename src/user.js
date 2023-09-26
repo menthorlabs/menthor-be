@@ -1,66 +1,46 @@
-const mysql = require("mysql2/promise");
-const CONNECTION = mysql.createConnection(process.env.DATABASE_URL);
-
-const connectionResolver = async () => {
-  if (CONNECTION && CONNECTION.state !== "disconnected") {
-    return CONNECTION;
-  } else {
-    CONNECTION = mysql.createConnection(connectionString);
-    CONNECTION.query = util.promisify(CONNECTION.query);
-
-    try {
-      await CONNECTION.connect();
-      return CONNECTION;
-    } catch (err) {
-      console.error("Database connection failed: ", err.stack);
-      throw err;
-    }
-  }
-};
+const connectionResolver = require('./database');
 
 const fieldsAllowed = [
-  "Username",
-  "Email",
-  "Name",
-  "ImageUrl",
-  "Tags",
-  "Ranks",
-  "Badges",
+  'Username',
+  'Email',
+  'Name',
+  'ImageUrl',
+  'Tags',
+  'Ranks',
+  'Badges',
 ];
 
-const clerkToDb = (clerkUser) => {
-  return {
-    Id: clerkUser.id,
-    Username: clerkUser.username,
-    Email: clerkUser.email_addresses[0].email_address,
-    Name: clerkUser.first_name + " " + clerkUser.last_name ?? "",
-    ImageUrl: clerkUser.image_url,
-    Tags: JSON.stringify(clerkUser.private_metadata.tags),
-    Ranks: JSON.stringify(clerkUser.private_metadata.ranks),
-    Badges: JSON.stringify(clerkUser.private_metadata.badges),
-  };
-};
+const clerkToDb = (clerkUser) => ({
+  Id: clerkUser.id,
+  Username: clerkUser.username,
+  Email: clerkUser.email_addresses[0].email_address,
+  Name: `${clerkUser.first_name} ${clerkUser.last_name}` ?? '',
+  ImageUrl: clerkUser.image_url,
+  Tags: JSON.stringify(clerkUser.private_metadata.tags),
+  Ranks: JSON.stringify(clerkUser.private_metadata.ranks),
+  Badges: JSON.stringify(clerkUser.private_metadata.badges),
+});
 
 // Clerks webhook for create, update and delete user
-module.exports.webhook = async (event, _context) => {
-  if (event.headers["X-Clerk-Webhook-Key"] !== process.env.CLERK_WEBHOOK_KEY) {
+module.exports.webhook = async (event) => {
+  if (event.headers['X-Clerk-Webhook-Key'] !== process.env.CLERK_WEBHOOK_KEY) {
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 401,
-      body: JSON.stringify({ error: "Unauthorized" }),
+      body: JSON.stringify({ error: 'Unauthorized' }),
     };
   }
   const body = JSON.parse(event.body);
 
-  if (body.type === "user.created") {
+  if (body.type === 'user.created') {
     const connection = await connectionResolver();
 
     try {
       const user = clerkToDb(body.data);
-      const [rows] = await connection.query("INSERT INTO User SET ?", user);
+      const [rows] = await connection.query('INSERT INTO User SET ?', user);
       // const [count] = await connection.query("SELECT COUNT(*) FROM User");
 
       // if (count[0]["count(*)"] <= 1000) {
@@ -82,8 +62,8 @@ module.exports.webhook = async (event, _context) => {
 
       return {
         headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
         },
         statusCode: 200,
         body: JSON.stringify(rows),
@@ -92,14 +72,14 @@ module.exports.webhook = async (event, _context) => {
       console.error(err);
       return {
         headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
         },
         statusCode: 500,
         body: JSON.stringify(err),
       };
     }
-  } else if (body.type === "user.updated") {
+  } else if (body.type === 'user.updated') {
     const connection = await connectionResolver();
 
     try {
@@ -115,7 +95,7 @@ module.exports.webhook = async (event, _context) => {
 
       const updateQuery = `UPDATE User SET ${Object.keys(fieldsToUpdate)
         .map((key) => `${key} = ?`)
-        .join(", ")} WHERE Id = ?`;
+        .join(', ')} WHERE Id = ?`;
 
       const updateValues = Object.values(fieldsToUpdate);
       updateValues.push(user.Id);
@@ -123,8 +103,8 @@ module.exports.webhook = async (event, _context) => {
       const [rows] = await connection.query(updateQuery, updateValues);
       return {
         headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
         },
         statusCode: 200,
         body: JSON.stringify(rows),
@@ -133,24 +113,24 @@ module.exports.webhook = async (event, _context) => {
       console.error(err);
       return {
         headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
         },
         statusCode: 500,
         body: JSON.stringify(err),
       };
     }
-  } else if (body.type === "user.deleted") {
+  } else if (body.type === 'user.deleted') {
     const connection = await connectionResolver();
 
     try {
-      const [rows] = await connection.query("DELETE FROM User WHERE Id = ?", [
+      const [rows] = await connection.query('DELETE FROM User WHERE Id = ?', [
         body.data.id,
       ]);
       return {
         headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
         },
         statusCode: 200,
         body: JSON.stringify(rows),
@@ -159,8 +139,8 @@ module.exports.webhook = async (event, _context) => {
       console.error(err);
       return {
         headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Credentials": true,
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
         },
         statusCode: 500,
         body: JSON.stringify(err),
@@ -169,8 +149,8 @@ module.exports.webhook = async (event, _context) => {
   } else {
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
       body: JSON.stringify({}),
@@ -178,20 +158,20 @@ module.exports.webhook = async (event, _context) => {
   }
 };
 
-module.exports.get = async (event, _context) => {
-  const userId = event.pathParameters.userId;
+module.exports.get = async (event) => {
+  const { userId } = event.pathParameters;
 
   const connection = await connectionResolver();
   try {
     const [rows] = await connection.query(
-      "SELECT ImageUrl, Name, Tags, Ranks, Badges FROM User WHERE Id = ? or Username = ?",
-      [userId, userId]
+      'SELECT ImageUrl, Name, Tags, Ranks, Badges FROM User WHERE Id = ? or Username = ?',
+      [userId, userId],
     );
 
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 200,
       body: JSON.stringify(rows),
@@ -200,8 +180,8 @@ module.exports.get = async (event, _context) => {
     console.error(err);
     return {
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Credentials": true,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
       },
       statusCode: 500,
       body: JSON.stringify(err),
