@@ -84,13 +84,6 @@ const deleteFile = async (file) => {
 // ## Routes
 module.exports.returnAllFileLinks = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { lessonId } = event.pathParameters || null;
-  if (!lessonId) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Missing id parameter' }),
-    };
-  }
 
   const connection = await connectionResolver();
   try {
