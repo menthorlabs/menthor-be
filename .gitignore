@@ -132,3 +132,4 @@ dev-serverless.yml
 *.lock
 serverless-dev.yml
 serverless-prod.yml
+src/user.js

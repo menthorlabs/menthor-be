@@ -19,5 +19,10 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
   },
-  rules: {},
+  rules: {
+    // Ignore end of file in windows
+    // 'linebreak-style': 0,
+    // ignore console
+    'no-console': 0,
+  },
 };
