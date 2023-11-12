@@ -62,7 +62,10 @@ const getSignedUrlPromise = async (ContentType) => {
     const signedUrl = await getSignedUrl(s3Client, command, {
       expiresIn: 3600,
     });
-    return signedUrl;
+    return {
+      url: signedUrl,
+      fileName,
+    };
   } catch (error) {
     console.error('Error uploading file:', error);
     throw new Error('Failed to upload file');

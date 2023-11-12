@@ -56,7 +56,10 @@ const getSignedUrlPromise = async (ContentType) => {
     const signedUrl = await getSignedUrl(s3Client, command, {
       expiresIn: 3600,
     });
-    return signedUrl;
+    return {
+      url: signedUrl,
+      fileName,
+    };
   } catch (error) {
     console.error('Error uploading file:', error);
     throw new Error('Failed to upload file');
@@ -402,10 +405,10 @@ module.exports.requestSubmissionUrl = async (event) => {
       }
     }
 
-    const url = await getSignedUrlPromise(ContentType);
+    const signedUrl = await getSignedUrlPromise(ContentType);
 
     connection.query('UPDATE Submission SET Filename = ? WHERE Id = ?', [
-      url.fileName,
+      signedUrl.fileName,
       submissionId,
       userEmail,
     ]);
@@ -418,8 +421,8 @@ module.exports.requestSubmissionUrl = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         message: 'Submission url generated successfully',
-        url,
-        fileName: url.fileName,
+        url: signedUrl.url,
+        fileName: signedUrl.fileName,
       }),
     };
   } catch (error) {
