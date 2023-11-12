@@ -9,12 +9,21 @@ const { v4: uuidv4 } = require('uuid');
 
 const connectionResolver = require('./database');
 
+const region = process.env.AWS_REG;
+const accessKeyId = process.env.AWS_AKID;
+const secretAccessKey = process.env.AWS_SAK;
+const bucketName = process.env.BUCKET_CONTENT;
+
 // Create a function that goes to AWS S3 and return the size of a list of files
 const getFilesSize = async (files) => {
-  const s3Client = new S3Client({
-    region: process.env.AWS_REG,
-  });
-  const bucketName = process.env.BUCKET_CONTENT;
+  const clientParams = {
+    credentials: {
+      accessKeyId,
+      secretAccessKey,
+    },
+    region,
+  };
+  const s3Client = new S3Client(clientParams);
   const filesSize = await Promise.all(
     files.map(async (file) => {
       const command = new HeadObjectCommand({
@@ -30,10 +39,6 @@ const getFilesSize = async (files) => {
 
 const getSignedUrlPromise = async (ContentType) => {
   const fileName = `${uuidv4()}`;
-  const region = process.env.AWS_REG;
-  const accessKeyId = process.env.AWS_AKID;
-  const secretAccessKey = process.env.AWS_SAK;
-  const bucketName = process.env.BUCKET_CONTENT;
 
   const clientParams = {
     credentials: {
@@ -68,7 +73,6 @@ const deleteFile = async (file) => {
   const s3Client = new S3Client({
     region: process.env.AWS_REG,
   });
-  const bucketName = process.env.BUCKET_CONTENT;
   const command = new DeleteObjectCommand({
     Bucket: bucketName,
     Key: file,
@@ -86,10 +90,18 @@ module.exports.returnAllFileLinks = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
 
   const connection = await connectionResolver();
+  let images;
   try {
     const query = 'SELECT Images FROM ContentCreator WHERE UserId = ?';
     const [rows] = await connection.query(query, [userEmail]);
-    const images = JSON.parse(rows[0].Images);
+    if (rows.length === 0) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify([]),
+      };
+    }
+
+    images = rows[0].Images;
     const filesSize = await getFilesSize(images);
     return {
       statusCode: 200,
@@ -99,6 +111,15 @@ module.exports.returnAllFileLinks = async (event) => {
       }),
     };
   } catch (err) {
+    if (images) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          images,
+          filesSize: 0,
+        }),
+      };
+    }
     console.error(err);
     return {
       statusCode: 500,
@@ -109,14 +130,7 @@ module.exports.returnAllFileLinks = async (event) => {
 
 module.exports.deleteFile = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { filesName } = JSON.parse(event.body) || null;
-
-  if (!filesName) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Missing filesName parameter' }),
-    };
-  }
+  const fileId = event.pathParameters.id;
 
   const connection = await connectionResolver();
 
@@ -124,14 +138,14 @@ module.exports.deleteFile = async (event) => {
     const query = 'SELECT Images FROM ContentCreator WHERE UserId = ?';
     const [rows] = await connection.query(query, [userEmail]);
     const images = JSON.parse(rows[0].Images);
-    const newImages = images.filter((image) => !filesName.includes(image));
+    const newImages = images.filter((image) => image !== fileId);
     const newImagesString = JSON.stringify(newImages);
     const queryUpdate = 'UPDATE ContentCreator SET Images = ? WHERE UserId = ?';
     await connection.query(queryUpdate, [newImagesString, userEmail]);
-    await Promise.all(filesName.map((file) => deleteFile(file)));
+    await deleteFile(fileId);
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Files deleted' }),
+      body: JSON.stringify({ message: 'File deleted' }),
     };
   } catch (err) {
     console.error(err);
@@ -178,12 +192,12 @@ module.exports.uploadFile = async (event) => {
 
 module.exports.fileUploaded = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const { fileName } = JSON.parse(event.body) || null;
+  const { url } = JSON.parse(event.body) || null;
 
-  if (!fileName) {
+  if (!url) {
     return {
       statusCode: 400,
-      body: JSON.stringify({ error: 'Missing fileName parameter' }),
+      body: JSON.stringify({ error: 'Missing url parameter' }),
     };
   }
 
@@ -192,14 +206,27 @@ module.exports.fileUploaded = async (event) => {
   try {
     const query = 'SELECT Images FROM ContentCreator WHERE UserId = ?';
     const [rows] = await connection.query(query, [userEmail]);
-    const images = JSON.parse(rows[0].Images);
-    const newImages = [...images, fileName];
+    if (
+      rows.length === 0 ||
+      rows[0].Images === null ||
+      rows[0].Images === 'null'
+    ) {
+      const newImages = [url];
+      const newImagesString = JSON.stringify(newImages);
+      const queryUpdate =
+        'INSERT INTO ContentCreator (Id, UserId, Images) VALUES (UUID(), ?, ?)';
+      await connection.query(queryUpdate, [userEmail, newImagesString]);
+      return {
+        statusCode: 204,
+      };
+    }
+    const images = rows[0].Images;
+    const newImages = [...images, url];
     const newImagesString = JSON.stringify(newImages);
     const queryUpdate = 'UPDATE ContentCreator SET Images = ? WHERE UserId = ?';
     await connection.query(queryUpdate, [newImagesString, userEmail]);
     return {
-      statusCode: 200,
-      body: JSON.stringify({ message: 'File uploaded' }),
+      statusCode: 204,
     };
   } catch (err) {
     console.error(err);
