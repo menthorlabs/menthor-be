@@ -73,9 +73,14 @@ const getSignedUrlPromise = async (ContentType) => {
 };
 
 const deleteFile = async (file) => {
-  const s3Client = new S3Client({
-    region: process.env.AWS_REG,
-  });
+  const clientParams = {
+    credentials: {
+      accessKeyId,
+      secretAccessKey,
+    },
+    region,
+  };
+  const s3Client = new S3Client(clientParams);
   const command = new DeleteObjectCommand({
     Bucket: bucketName,
     Key: file,
