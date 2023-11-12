@@ -96,6 +96,10 @@ module.exports.returnAllFileLinks = async (event) => {
     const [rows] = await connection.query(query, [userEmail]);
     if (rows.length === 0) {
       return {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+        },
         statusCode: 200,
         body: JSON.stringify([]),
       };
@@ -104,6 +108,10 @@ module.exports.returnAllFileLinks = async (event) => {
     images = rows[0].Images;
     const filesSize = await getFilesSize(images);
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       statusCode: 200,
       body: JSON.stringify({
         images,
@@ -113,6 +121,10 @@ module.exports.returnAllFileLinks = async (event) => {
   } catch (err) {
     if (images) {
       return {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+        },
         statusCode: 200,
         body: JSON.stringify({
           images,
@@ -122,6 +134,10 @@ module.exports.returnAllFileLinks = async (event) => {
     }
     console.error(err);
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       statusCode: 500,
       body: JSON.stringify(err),
     };
@@ -144,12 +160,20 @@ module.exports.deleteFile = async (event) => {
     await connection.query(queryUpdate, [newImagesString, userEmail]);
     await deleteFile(fileId);
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       statusCode: 200,
       body: JSON.stringify({ message: 'File deleted' }),
     };
   } catch (err) {
     console.error(err);
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       statusCode: 500,
       body: JSON.stringify(err),
     };
@@ -162,6 +186,10 @@ module.exports.uploadFile = async (event) => {
 
   if (!fileType) {
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       statusCode: 400,
       body: JSON.stringify({ error: 'Missing fileType parameter' }),
     };
@@ -172,18 +200,30 @@ module.exports.uploadFile = async (event) => {
     const [rows] = await connection.query(query, [true, userEmail]);
     if (rows.length === 0) {
       return {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+        },
         statusCode: 400,
         body: JSON.stringify({ error: 'User is not content creator' }),
       };
     }
     const signedUrl = await getSignedUrlPromise(fileType);
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       statusCode: 200,
       body: JSON.stringify({ signedUrl }),
     };
   } catch (err) {
     console.error(err);
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       statusCode: 500,
       body: JSON.stringify(err),
     };
@@ -196,6 +236,10 @@ module.exports.fileUploaded = async (event) => {
 
   if (!url) {
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       statusCode: 400,
       body: JSON.stringify({ error: 'Missing url parameter' }),
     };
@@ -217,6 +261,10 @@ module.exports.fileUploaded = async (event) => {
         'INSERT INTO ContentCreator (Id, UserId, Images) VALUES (UUID(), ?, ?)';
       await connection.query(queryUpdate, [userEmail, newImagesString]);
       return {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true,
+        },
         statusCode: 204,
       };
     }
@@ -226,11 +274,19 @@ module.exports.fileUploaded = async (event) => {
     const queryUpdate = 'UPDATE ContentCreator SET Images = ? WHERE UserId = ?';
     await connection.query(queryUpdate, [newImagesString, userEmail]);
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       statusCode: 204,
     };
   } catch (err) {
     console.error(err);
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true,
+      },
       statusCode: 500,
       body: JSON.stringify(err),
     };

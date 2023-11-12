@@ -17,13 +17,14 @@ module.exports.handler = async (event) => {
     };
   }
 
-  const Authorization = event.headers?.Authorization
-    || event.headers?.authorization
-    || event.authorizationToken;
+  const Authorization =
+    event.headers?.Authorization ||
+    event.headers?.authorization ||
+    event.authorizationToken;
   const splitPem = process.env.CLERK_JWT_VERIFICATION_KEY?.match(/.{1,64}/g);
-  const publicKey = `-----BEGIN PUBLIC KEY-----\n${
-    splitPem?.join('\n')
-  }\n-----END PUBLIC KEY-----`;
+  const publicKey = `-----BEGIN PUBLIC KEY-----\n${splitPem?.join(
+    '\n',
+  )}\n-----END PUBLIC KEY-----`;
   if (!Authorization) {
     throw Error('Not Signed In');
   }
