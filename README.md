@@ -1,27 +1,36 @@
-# menthor-be
+# Menthor-BE: Backend for Menthor
 
-How to run it locally
+## How to Run Locally
 
-put the serverless.yml in the root folder
+1. Place the `serverless.yml` file in the root folder.
+2. Install the Serverless Framework globally:
 
-run:
+    ```bash
+    npm i -g serverless
+    ```
 
-`npm i -g serverless`
+    or use the equivalent Yarn command.
 
-or yarn equivalent
+3. Install the Node dependencies:
 
-install node dependencies
+    ```bash
+    npm install
+    ```
 
-`npm i`
+    or
 
-or
+    ```bash
+    yarn
+    ```
 
-`yarn`
+4. To run the project:
 
-to run the project:
+    ```bash
+    npm run serve
+    ```
 
-`npm run serve`
+5. To listen to file changes and auto-reload:
 
-to listen to file changes and auto-reload
-
-`npm run serve:watch`
+    ```bash
+    npm run serve:watch
+    ```
