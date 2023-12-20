@@ -8,7 +8,7 @@ provider:
   runtime: nodejs18.x
   memorySize: 192
   timeout: 10
-  stage: ${env:NODE_ENV}
+  stage: ${env:STAGE, 'dev'}
   region: sa-east-1
   httpApi:
     authorizers:
