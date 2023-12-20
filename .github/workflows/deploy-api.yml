@@ -21,6 +21,13 @@ jobs:
     - name: Install dependencies
       run: |
         npm install
+    - name: Debugging info
+      env:
+        BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+        BUCKET_CONTENT: ${{ secrets.BUCKET_CONTENT }}
+      run: |
+        echo "Listing environment variables"
+        printenv
 
     - name: Deploy to AWS Lambda using Serverless Framework
       env:
