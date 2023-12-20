@@ -1,4 +1,4 @@
-org: gabrielmlyra
+#org: gabrielmlyra
 app: menthor-lambda-api
 service: menthor-lambda-api
 frameworkVersion: "3"
