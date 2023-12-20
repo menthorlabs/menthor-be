@@ -23,16 +23,6 @@ const clerkToDb = (clerkUser) => ({
 
 // Clerks webhook for create, update and delete user
 module.exports.webhook = async (event) => {
-  if (event.headers['X-Clerk-Webhook-Key'] !== process.env.CLERK_WEBHOOK_KEY) {
-    return {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': true,
-      },
-      statusCode: 401,
-      body: JSON.stringify({ error: 'Unauthorized' }),
-    };
-  }
   const body = JSON.parse(event.body);
 
   if (body.type === 'user.created') {
@@ -59,6 +49,13 @@ module.exports.webhook = async (event) => {
       //     }),
       //   });
       // }
+
+      if (body.data.public_metadata.isCreator === true) {
+        await connection.query(
+          'UPDATE User SET IsContentCreator = ? WHERE Id = ?',
+          [true, user.Id],
+        );
+      }
 
       return {
         headers: {
@@ -101,6 +98,14 @@ module.exports.webhook = async (event) => {
       updateValues.push(user.Id);
 
       const [rows] = await connection.query(updateQuery, updateValues);
+
+      if (body.data.public_metadata.isCreator === true) {
+        await connection.query(
+          'UPDATE User SET IsContentCreator = ? WHERE Id = ?',
+          [true, user.Id],
+        );
+      }
+
       return {
         headers: {
           'Access-Control-Allow-Origin': '*',

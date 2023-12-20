@@ -1,4 +1,4 @@
-org: menhtorlabs
+org: gabrielmlyra
 app: menthor-lambda-api
 service: menthor-lambda-api
 frameworkVersion: "3"
@@ -8,7 +8,7 @@ provider:
   runtime: nodejs18.x
   memorySize: 192
   timeout: 10
-  stage: dev
+  stage: ${env:NODE_ENV}
   region: sa-east-1
   httpApi:
     authorizers:
@@ -16,25 +16,30 @@ provider:
         type: request
         functionName: custom-authorizer
   environment:
-    GUILD_ID: 
-    CLIENT_ID: 
-    BOT_SECRET: 
-    BOT_TOKEN: 
-    NODE_ENV: 
-    GITHUB_TOKEN: 
-    AWS_REG: 
-    AWS_AKID: 
-    AWS_SAK: 
-    BUCKET_NAME: 
-    CLERK_SECRET_KEY: 
-    CLERK_KEY: 
-    CLERK_JWT_VERIFICATION_KEY: 
-    DATABASE_URL: mysql://...
+    GUILD_ID: ${env:GUILD_ID}
+    CLIENT_ID: ${env:CLIENT_ID}
+    DISCORD_WEBHOOK_URL: ${env:DISCORD_WEBHOOK_URL}
+    BOT_SECRET: ${env:BOT_SECRET}
+    BOT_TOKEN: ${env:BOT_TOKEN}
+    NODE_ENV: ${env:NODE_ENV}
+    GITHUB_TOKEN: ${env:GITHUB_TOKEN}
+    MAILGUN_API_KEY: ${env:MAILGUN_API_KEY}
+    MAILGUN_DOMAIN: ${env:MAILGUN_DOMAIN}
+    MAILGUN_LIST_ADDRESS: ${env:MAILGUN_LIST_ADDRESS}
+    AWS_REG: ${env:AWS_REG}
+    AWS_AKID: ${env:AWS_AKID}
+    AWS_SAK: ${env:AWS_SAK}
+    BUCKET_NAME: ${env:BUCKET_NAME}
+    BUCKET_CONTENT: ${env:BUCKET_CONTENT}
+    CLERK_SECRET_KEY: ${env:CLERK_SECRET_KEY}
+    CLERK_KEY: ${env:CLERK_KEY}
+    CLERK_JWT_VERIFICATION_KEY: ${env:CLERK_JWT_VERIFICATION_KEY}
+    DATABASE_URL: ${env:DATABASE_URL}
 
 functions:
   custom-authorizer:
     handler: src/authorizer.handler # Updated the handler path
-    
+
   # User Functions
   webhook:
     handler: src/user.webhook # Updated the handler path
@@ -305,6 +310,63 @@ functions:
           path: roadmaps
           method: get
           cors: true
+  # ContentCreator - Functions
+  creatorWebhook:
+    handler: src/content.webhook
+    timeout: 60
+    events:
+      - http:
+          path: creators/webhook
+          method: post
+          cors: true
+  returnAllFileLinks:
+    handler: src/content.returnAllFileLinks # Updated the handler path
+    events:
+      - http:
+          path: creators/images
+          method: get
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  deleteFile:
+    handler: src/content.deleteFile # Updated the handler path
+    events:
+      - http:
+          path: creators/images/{fileId}
+          method: delete
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  fileUploaded:
+    handler: src/content.fileUploaded # Updated the handler path
+    events:
+      - http:
+          path: creators/images
+          method: post
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
+  uploadFile:
+    handler: src/content.uploadFile # Updated the handler path
+    events:
+      - http:
+          path: creators/images/sign-url
+          method: post
+          cors: true
+          authorizer:
+            name: custom-authorizer
+            scopes: # Optional
+              - user.id
+              - user.email
 
 plugins:
   - serverless-offline

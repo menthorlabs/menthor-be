@@ -127,8 +127,6 @@ dist
 .pnp.*
 
 package-lock.json
-serverless.yml
-dev-serverless.yml
 *.lock
 serverless-dev.yml
 serverless-prod.yml
