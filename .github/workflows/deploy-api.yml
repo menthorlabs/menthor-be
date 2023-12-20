@@ -11,22 +11,21 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
     - name: Set up Nodejs
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v1
       with:
         node-version: '18.x'
-    - run: npm ci
-    
-    - name: serverless deploy
-      uses: serverless/github-action@v3.2
-      with:
-        args: deploy
+
+    - name: Install dependencies
+      run: |
+        npm install
+
+    - name: Deploy to AWS Lambda using Serverless Framework
       env:
-        SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID  }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
         AWS_REGION: 'sa-east-1'
         GUILD_ID: ${{ secrets.GUILD_ID }}
         CLIENT_ID: ${{ secrets.CLIENT_ID }}
@@ -47,3 +46,6 @@ jobs:
         CLERK_KEY: ${{ secrets.CLERK_KEY }}
         CLERK_JWT_VERIFICATION_KEY: ${{ secrets.CLERK_JWT_VERIFICATION_KEY }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      run: |
+        npm install -g serverless
+        serverless deploy
