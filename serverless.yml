@@ -18,19 +18,6 @@ provider:
   environment:
     GUILD_ID: ${env:GUILD_ID}
     CLIENT_ID: ${env:CLIENT_ID}
-<<<<<<<< HEAD:serverless.yml~refs/remotes/origin/develop
-    BOT_SECRET: ${env:BOT_SECRET} 
-    BOT_TOKEN: ${env:BOT_TOKEN} 
-    NODE_ENV: ${env:NODE_ENV} 
-    GITHUB_TOKEN: ${env:GITHUB_TOKEN} 
-    AWS_REG: ${env:AWS_REG} 
-    AWS_AKID: ${env:AWS_AKID} 
-    AWS_SAK: ${env:AWS_SAK} 
-    BUCKET_NAME: ${env:BUCKET_NAME} 
-    CLERK_SECRET_KEY: ${env:CLERK_SECRET_KEY} 
-    CLERK_KEY: ${env:CLERK_KEY} 
-    CLERK_JWT_VERIFICATION_KEY: ${env:CLERK_JWT_VERIFICATION_KEY} 
-========
     DISCORD_WEBHOOK_URL: ${env:DISCORD_WEBHOOK_URL}
     BOT_SECRET: ${env:BOT_SECRET}
     BOT_TOKEN: ${env:BOT_TOKEN}
@@ -47,7 +34,6 @@ provider:
     CLERK_SECRET_KEY: ${env:CLERK_SECRET_KEY}
     CLERK_KEY: ${env:CLERK_KEY}
     CLERK_JWT_VERIFICATION_KEY: ${env:CLERK_JWT_VERIFICATION_KEY}
->>>>>>>> a5206d751887806707d55bd4191ddf0a00081eef:serverless.yml
     DATABASE_URL: ${env:DATABASE_URL}
 
 functions:
