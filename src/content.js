@@ -1,4 +1,5 @@
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const axios = require('axios');
 const {
   S3Client,
   PutObjectCommand,
@@ -6,13 +7,13 @@ const {
   HeadObjectCommand,
 } = require('@aws-sdk/client-s3');
 const { v4: uuidv4 } = require('uuid');
-
 const connectionResolver = require('./database');
 
 const region = process.env.AWS_REG;
 const accessKeyId = process.env.AWS_AKID;
 const secretAccessKey = process.env.AWS_SAK;
 const bucketName = process.env.BUCKET_CONTENT;
+const { DISCORD_WEBHOOK_URL } = process.env;
 
 // Create a function that goes to AWS S3 and return the size of a list of files
 const getFilesSize = async (files) => {
@@ -148,6 +149,38 @@ module.exports.returnAllFileLinks = async (event) => {
       },
       statusCode: 500,
       body: JSON.stringify(err),
+    };
+  }
+};
+
+module.exports.webhook = async (event) => {
+  try {
+    const body = JSON.parse(event.body); // Parse the event body
+
+    // Prepare the message content
+    const message = {
+      content: 'New Event Received:',
+      embeds: [
+        {
+          title: 'Event Details',
+          description: `\`\`\`json\n${JSON.stringify(body, null, 2)}\n\`\`\``,
+          color: 5814783,
+        },
+      ],
+    };
+
+    // Send the message using Discord webhook
+    await axios.post(DISCORD_WEBHOOK_URL, message);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: 'Event processed and sent to Discord.' }),
+    };
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Failed to process event.' }),
     };
   }
 };

@@ -16,20 +16,20 @@ provider:
         type: request
         functionName: custom-authorizer
   environment:
-    GUILD_ID: 
-    CLIENT_ID: 
-    BOT_SECRET: 
-    BOT_TOKEN: 
-    NODE_ENV: 
-    GITHUB_TOKEN: 
-    AWS_REG: 
-    AWS_AKID: 
-    AWS_SAK: 
-    BUCKET_NAME: 
-    CLERK_SECRET_KEY: 
-    CLERK_KEY: 
-    CLERK_JWT_VERIFICATION_KEY: 
-    DATABASE_URL: mysql://...
+    GUILD_ID: ${env:GUILD_ID}
+    CLIENT_ID: ${env:CLIENT_ID}
+    BOT_SECRET: ${env:BOT_SECRET} 
+    BOT_TOKEN: ${env:BOT_TOKEN} 
+    NODE_ENV: ${env:NODE_ENV} 
+    GITHUB_TOKEN: ${env:GITHUB_TOKEN} 
+    AWS_REG: ${env:AWS_REG} 
+    AWS_AKID: ${env:AWS_AKID} 
+    AWS_SAK: ${env:AWS_SAK} 
+    BUCKET_NAME: ${env:BUCKET_NAME} 
+    CLERK_SECRET_KEY: ${env:CLERK_SECRET_KEY} 
+    CLERK_KEY: ${env:CLERK_KEY} 
+    CLERK_JWT_VERIFICATION_KEY: ${env:CLERK_JWT_VERIFICATION_KEY} 
+    DATABASE_URL: ${env:DATABASE_URL}
 
 functions:
   custom-authorizer:

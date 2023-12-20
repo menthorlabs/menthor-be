@@ -4,7 +4,8 @@ module.exports = {
     es2021: true,
     node: true,
   },
-  extends: ['airbnb-base'],
+  plugins: ['jest'],
+  extends: ['airbnb-base', 'plugin:jest/recommended'],
   overrides: [
     {
       env: {
