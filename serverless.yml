@@ -16,23 +16,19 @@ provider:
         type: request
         functionName: custom-authorizer
   environment:
-    GUILD_ID: ${param:GUILD_ID}
-    CLIENT_ID: ${param:CLIENT_ID}
-    DISCORD_WEBHOOK_URL: ${param:DISCORD_WEBHOOK_URL}
-    BOT_SECRET: ${param:BOT_SECRET}
-    BOT_TOKEN: ${param:BOT_TOKEN}
-    NODE_ENV: ${param:NODE_ENV}
-    GITHUB_TOKEN: ${param:GITHUB_TOKEN}
-    MAILGUN_API_KEY: ${param:MAILGUN_API_KEY}
-    MAILGUN_DOMAIN: ${param:MAILGUN_DOMAIN}
-    MAILGUN_LIST_ADDRESS: ${param:MAILGUN_LIST_ADDRESS}
-    AWS_REG: ${param:AWS_REG}
-    AWS_AKID: ${param:AWS_AKID}
-    AWS_SAK: ${param:AWS_SAK}
-    BUCKET_NAME: ${param:BUCKET_NAME}
-    BUCKET_CONTENT: ${param:BUCKET_CONTENT}
-    CLERK_SECRET_KEY: ${param:CLERK_SECRET_KEY}
-    CLERK_KEY: ${param:CLERK_KEY}
+    GUILD_ID: ${param:GUILD_ID} 
+    CLIENT_ID: ${param:CLIENT_ID} 
+    BOT_SECRET: ${param:BOT_SECRET} 
+    BOT_TOKEN: ${param:BOT_TOKEN} 
+    NODE_ENV: ${param:NODE_ENV} 
+    GITHUB_TOKEN: ${param:GITHUB_TOKEN} 
+    AWS_REG: ${param:AWS_REG} 
+    AWS_AKID: ${param:AWS_AKID} 
+    AWS_SAK: ${param:AWS_SAK} 
+    BUCKET_NAME: ${param:BUCKET_NAME} 
+    BUCKET_CONTENT: ${param:BUCKET_CONTENT} 
+    CLERK_SECRET_KEY: ${param:CLERK_SECRET_KEY} 
+    CLERK_KEY: ${param:CLERK_KEY} 
     CLERK_JWT_VERIFICATION_KEY: ${param:CLERK_JWT_VERIFICATION_KEY}
     DATABASE_URL: ${param:DATABASE_URL}
 
