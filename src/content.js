@@ -123,7 +123,7 @@ module.exports.returnAllFileLinks = async (event) => {
       },
       statusCode: 200,
       body: JSON.stringify({
-        images,
+        images: images.reverse(),
         filesSize,
       }),
     };
@@ -187,14 +187,14 @@ module.exports.webhook = async (event) => {
 
 module.exports.deleteFile = async (event) => {
   const userEmail = event.requestContext.authorizer.principalId;
-  const fileId = event.pathParameters.id;
+  const { fileId } = event.pathParameters;
 
   const connection = await connectionResolver();
 
   try {
     const query = 'SELECT Images FROM ContentCreator WHERE UserId = ?';
     const [rows] = await connection.query(query, [userEmail]);
-    const images = JSON.parse(rows[0].Images);
+    const images = rows[0].Images;
     const newImages = images.filter((image) => image !== fileId);
     const newImagesString = JSON.stringify(newImages);
     const queryUpdate = 'UPDATE ContentCreator SET Images = ? WHERE UserId = ?';

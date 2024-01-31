@@ -28,6 +28,10 @@ const AvailableRoles = [
     name: 'html-basico',
   },
   {
+    id: '1198774028173836348',
+    name: 'ecommerce-2024',
+  },
+  {
     id: '1121857528058364084',
     name: 'novo cargo',
     description: null,
@@ -105,23 +109,8 @@ const getDiscordUser = async (code, uri) => {
   return response.data;
 };
 
-module.exports.requestRole = async (event, context) => {
-  // get the role id and check if is valid
-  const { roleId } = event.pathParameters;
-  if (!AvailableRoles.find((role) => role.id === roleId)) {
-    return {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': true,
-      },
-      statusCode: 400,
-      body: JSON.stringify({ message: 'Invalid role' }),
-    };
-  }
-
-  // call addrole and return the result
-  return module.exports.addRole(event, context);
-};
+module.exports.requestRole = async (event, context) =>
+  module.exports.addRole(event, context);
 
 module.exports.leave = async (event, context) => {
   // get the role id and check if is valid
