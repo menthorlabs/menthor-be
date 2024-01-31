@@ -1,38 +1,29 @@
-name: Deploy Lambda Function
+name: Deploy AWS Lambda Function
 
 on:
   push:
     branches:
-      - develop
+      - develop  # Set this to your default branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v2
 
-    - name: Set up Nodejs
+    - name: Set up Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: '18.x'
+        node-version: '18.x'  # Set this to your project's node version
 
-    - name: Install dependencies
-      run: |
-        npm install
-    - name: Debugging info
-      env:
-        BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
-        BUCKET_CONTENT: ${{ secrets.BUCKET_CONTENT }}
-      run: |
-        echo "Listing environment variables"
-        printenv
+    - name: Install Dependencies
+      run: npm install
 
-    - name: Deploy to AWS Lambda using Serverless Framework
+    - name: Deploy to AWS Lambda
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID  }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY  }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: 'sa-east-1'
         GUILD_ID: ${{ secrets.GUILD_ID }}
         CLIENT_ID: ${{ secrets.CLIENT_ID }}
@@ -53,6 +44,4 @@ jobs:
         CLERK_KEY: ${{ secrets.CLERK_KEY }}
         CLERK_JWT_VERIFICATION_KEY: ${{ secrets.CLERK_JWT_VERIFICATION_KEY }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      run: |
-        npm install -g serverless
-        serverless deploy
+      run: npx serverless deploy
